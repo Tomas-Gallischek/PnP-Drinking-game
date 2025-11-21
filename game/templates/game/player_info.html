@@ -10,10 +10,24 @@
 
     <h4>XP: <b>{{ one_player.xp }}</b></h4>
 
+
+<h1>Vypít:</h1>
+
 <form action="{% url 'drink' one_player.id %}" method="post">
     {% csrf_token %}
-    <button type="submit">Pít!</button>
+    
+    <button type="hidden" name="drink_type" value="panak">1 Panák</button>
+    Již vypito: <b>{{ one_player.panak }}</b> panáků
 
+    <p></p>
+    
+    <button type="hidden" name="drink_type" value="maly_kelimek">1 MALÝ kelímek</button>
+    Již vypito: <b>{{ one_player.maly_kelimek }}</b> malých kelímků
 
+    <p></p>
+    
+    <button type="hidden" name="drink_type" value="velky_kelimek">1 VELKÝ kelímek</button>
+    Již vypito: <b>{{ one_player.velky_kelimek }}</b> velkých kelímků
 
+</form>
 {% endblock content %}
