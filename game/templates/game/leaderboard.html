@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Žebříček{% endblock title %}
+
+{% block content %}
+
+<h1>Žebříček hráčů</h1>
+
+
+{% for one in all_players %}
+    <h2>
+        Hráč: 
+        <b>
+            <a href="{% url 'player_info' one.id %}">
+                {{ one.name }}
+            </a>
+        </b>
+    </h2>
+    <h3>Level: <b>{{ one.lvl }}</b></h3>
+    <h4>XP: <b>{{ one.xp }}</b></h4>
+{% endfor %}
+
+{% endblock content %}

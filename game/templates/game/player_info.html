@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h2>Hráč: <b>{{ one_player.name }}</b></h2>
+
+    <h2>ID: <b>{{ one_player.id }}</b></h2>
+
+    <h3>Level: <b>{{ one_player.lvl }}</b></h3>
+
+    <h4>XP: <b>{{ one_player.xp }}</b></h4>
+
+<form action="{% url 'drink' one_player.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Pít!</button>
+
+
+
+{% endblock content %}
