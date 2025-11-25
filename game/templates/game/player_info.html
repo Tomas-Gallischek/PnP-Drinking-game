@@ -8,11 +8,10 @@
 
     <h3>Level: <b>{{ one_player.lvl }}</b></h3>
 
-    <h4>XP: <b>{{ one_player.xp }}</b></h4>
+    <h4>XP: <b>{{ one_player.xp }} / {{ one_player.xp_need }}</b></h4>
 
 
 <h1>Vypít:</h1>
-
 <form action="{% url 'drink' one_player.id %}" method="post">
     {% csrf_token %}
     
@@ -28,6 +27,44 @@
     
     <button type="hidden" name="drink_type" value="velky_kelimek">1 VELKÝ kelímek</button>
     Již vypito: <b>{{ one_player.velky_kelimek }}</b> velkých kelímků
-
 </form>
+
+<h1>Side quest</h1>
+<form action="{% url "sidequest" %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Vyber si úkol</button>
+    <input type="hidden", name="player_id" value="{{ one_player.id }}">
+    <input type="hidden", name="player_lvl" value="{{ one_player.lvl }}">
+</form>
+
+<h1>Nástěnka:</h1>
+<form action="{% url "nastenka" %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Nástěnka</button>
+    <input type="hidden", name="player_id" value="{{ one_player.id }}">
+</form>
+
+<h1>Moje úkoly:</h1>
+
+{% for quest in player_quests %}
+    {% if quest.done == False %}
+        <h3>Název úkolu: <b>{{ quest.quest_name }}</b></h3>
+        <p>Popis: {{ quest.description }}</p>
+        <p>Odměna XP: {{ quest.xp_reward }}</p>
+        <p>Raritka: {{ quest.rarity }}</p>
+
+        <form action="{% url 'quest_failed' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="player_id" value="{{ one_player.id }}">
+            <input type="hidden" name="quest_id" value="{{ quest.id }}">
+            <button type="submit" 
+                    onclick="return confirm('Pro vzdání úkolu VYPÍJ PANÁKA :)');">
+                Vzdát úkol
+            </button>
+        </form>
+        <hr>
+    {% endif %}
+{% endfor %}
+
+
 {% endblock content %}

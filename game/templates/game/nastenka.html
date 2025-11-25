@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+{% if all_quests %}
+
+    {% for quest in all_quests %}
+        {% if quest.done == False %}
+            <h2>Hráč: <b>{{ quest.player }}</b></h2>
+            <h3>Název úkolu: <b>{{ quest.quest_name }}</b></h3>
+            <p>Popis: {{ quest.description }}</p>
+            <p>Odměna XP: {{ quest.xp_reward }}</p>
+            <p>Raritka: {{ quest.rarity }}</p>
+
+            <form action="{% url "quest_done" %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="quest_id" value="{{ quest.id }}">
+                <button type="submit">Splnit úkol</button>
+            </form>
+        {% endif %}
+    {% endfor %}
+
+{% else %}
+    <h1><p>Nikdo nemá aktivovaný žádný quest</p></h1> 
+{% endif %}
+
+
+{% endblock content %}
