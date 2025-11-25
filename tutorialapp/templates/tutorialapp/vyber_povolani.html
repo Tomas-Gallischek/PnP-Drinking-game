@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>TUTORIAL:</h1>
+
+Hráč: {{ chosen_player.name }}
+
+<h2>Vyber si svoje povolání:</h2>
+
+<form action="{% url "tut_end" %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="player_id" value="{{ chosen_player.id }}">
+
+    <button type="submit" name="povolani" value="mag">Kouzelník</button>
+
+    <p></p>
+
+    <button type="submit" name="povolani" value="valecnik">Válečník</button>
+
+    <p></p>
+
+    <button type="submit" name="povolani" value="hunter">Hunter</button>
+</form>
+
+{% endblock content %}

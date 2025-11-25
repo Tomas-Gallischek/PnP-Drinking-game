@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>TUTORIAL:</h1>
+
+<h2>Nyní se seznámíš se základy hry:</h2>
+
+<h2>Tvoje postava:</h2>
+
+<b>
+    <p>Na konci tothoto tutoriálu si můžeš vybrat jednu ze tří postav:
+        <ul>
+            <li>Kouzelník - Velké poškození, slabá obrana</li>
+            <li>Válečník - Malé poškození, velká výdrž</li>
+            <li>Hunter - Univerzální volba</li>
+        </ul>
+    </p>
+</b>
+
+<p>Každý hráč má svojí postavu kterou vylepšuje tím, jak si užívá silvestrovksý večer a to konkrétně dvěma způsoby:
+    <ul>
+        <li><b><strong>Plněním Questů</strong></b></li>
+        <li><b><strong>Pitím</strong></b></li>
+    </ul>
+</p>
+
+<p>Za tyto aktivity tvá postava získává XP body a za ně si zvyšuje svůj lvl</p>
+
+<p>Čím větší má postava lvl, tím se stává silnější</p>
+
+<h3>A proč je potřeba být silnější?</h3>
+<h4>Protože cílem hry je porazit 25 nebezpečných BOSSŮ světa <b><strong>MEME-LANDIA</strong></b></h4>
+
+<h2>Sami jste slabí, ale jako tým to zvládnete! Hodně štěstí dobrodruzi!</h2>
+
+<form action="{% url "vyber_postavy" %}">
+    <button type="submit">DALŠÍ</button>
+    <input type="hidden" name="player_id" value="{{ player_id }}">
+</form>
+
+<form action="{% url "tut_odloz_si" %}">
+    <button type="submit">ZPĚT</button>
+    <input type="hidden" name="player_id" value="{{ player_id }}">
+</form>
+
+
+{% endblock content %}

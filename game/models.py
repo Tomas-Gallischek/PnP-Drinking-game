@@ -1,13 +1,22 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class player(models.Model):
     name = models.CharField(max_length=100, blank=True)
     lvl = models.IntegerField(default=1, blank=True)
     xp = models.IntegerField(default=0, blank=True)
     xp_need = models.IntegerField(default=100, blank=True)
+    energie = models.IntegerField(default=100, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)])
+
     panak = models.IntegerField(default=0, blank=True)
     maly_kelimek = models.IntegerField(default=0, blank=True)
     velky_kelimek = models.IntegerField(default=0, blank=True)
+
+
+    povolani = models.CharField(max_length=50, blank=True)
+    dmg = models.IntegerField(blank=True, default= 10)
+    armor = models.IntegerField(blank=True, default= 5)
+    hp = models.IntegerField(blank=True, default=100)
 
     # Uvnitř class player(models.Model):
     def add_xp(self, amount):

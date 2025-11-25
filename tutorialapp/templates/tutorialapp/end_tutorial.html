@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>TUTORIAL UKONČEN!</h1>
+
+<H2>Gratuluji, tvoje postava byla úspěšně založena!</H2>
+
+
+<h3>Teď už můžeš začít hrát hru. Přejeme ti hodně zábavy!</h3>
+
+<form action="{% url 'player_info' player_id=chosen_player.id %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="player_id" value="{{ chosen_player.id }}">
+
+    <button type="submit">ZAČÍT HRU</button>
+
+</form>
+
+{% endblock content %}

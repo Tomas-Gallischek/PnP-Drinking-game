@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>TUTORIAL:</h1>
+
+<h2>Nyní tě čeká tvůj první quest dobrodruhu:</h2>
+
+<p>Zazvoň na zvonek tajné heslo, které je: <b>"S" v morzeovce</b></p>
+
+<p>Jakmile ti bude otevřeno, klikni na talčítko další.</p>
+
+<form action="{% url "tut_odloz_si" %}">
+    <button type="submit">DALŠÍ</button>
+    <input type="hidden" name="player_id" value="{{ player_id }}">
+</form>
+
+{% endblock content %}
+

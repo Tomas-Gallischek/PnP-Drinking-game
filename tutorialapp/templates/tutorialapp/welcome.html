@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>TUTORIAL:</h1>
+
+<h2>Zdravím tě dobrodruhu!</h2>
+<h3>Vítám tě ve hře P&P</h3>
+
+<h4>Pro zahájení tutoriálu klikni na talčítko <b><strong>"DALŠÍ"</strong></b>:</h4>
+
+<form action="{% url "tut_zazvonit" %}">
+    <button type="submit">DALŠÍ</button>
+    <input type="hidden" name="player_id" value="{{ player_id }}">
+</form>
+
+
+{% endblock content %}

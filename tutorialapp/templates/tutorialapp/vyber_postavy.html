@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>TUTORIAL:</h1>
+
+<h2>Identifikace hráče:</h2>
+
+{% for player in all_players  %}
+    <p></p>
+    <form action="{% url "vyber_povolani" %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="player_id" value="{{ player.id }}">
+        <button type="submit">{{ player.name }}</button>
+    </form>
+{% endfor %}
+
+
+{% endblock content %}

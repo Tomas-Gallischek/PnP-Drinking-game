@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>TUTORIAL:</h1>
+<h3>Výborně, zvládl jsi to!</h3>
+
+<h4>Teď si prosím odlož svůj armor a věci, které sis donesl z domovské lokace ukliď následovně:
+
+    <ul>
+        <li>Všechno co se dá jíst/pít zanes do místní hospody</li>
+        <li>Všechno ostatní zanes do dračí sluje</li>
+    </ul>
+
+<h2>POZOR! Jelikož si v tutoriálu, máš na sobě začátečnickou ochranu, která ti umožňuje vstup do všech lokací. Po skončení tutoriálu tato ochrana skončí.</h2>
+
+<form action="{% url "tut_seznameni" %}">
+    <button type="submit">DALŠÍ</button>
+    <input type="hidden" name="player_id" value="{{ player_id }}">
+</form>
+
+<form action="{% url "tut_zazvonit" %}">
+    <button type="submit">ZPĚT</button>
+    <input type="hidden" name="player_id" value="{{ player_id }}">
+</form>
+
+
+
+</h4>
+{% endblock content %}
+
+
+
+
