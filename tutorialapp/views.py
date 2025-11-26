@@ -42,11 +42,21 @@ def tut_end(request):
             hp_koef = 1
 
         chosen_player = player.objects.get(id=player_id)
+        # NASTAVENÍ ZÁKLADNÍCH HODNOT
         chosen_player.dmg = dmg
         chosen_player.dmg_koef = dmg_koef
         chosen_player.armor = obrana
         chosen_player.armor_koef = obrana_koef
         chosen_player.hp = hp
+        chosen_player.hp_koef = hp_koef
+        chosen_player.povolani = povolani
+
+        # NASTAVENÍ HODNOT PRO LVL 1
+        chosen_player.dmg_now = dmg
+        chosen_player.dmg_koef = dmg_koef
+        chosen_player.armor_now = obrana
+        chosen_player.armor_koef = obrana_koef
+        chosen_player.hp_now = hp
         chosen_player.hp_koef = hp_koef
         chosen_player.povolani = povolani
         chosen_player.save()

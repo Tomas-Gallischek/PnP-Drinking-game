@@ -121,11 +121,25 @@ def drink(request, player_id):
 def player_info(request, player_id):
     
     one_player = player.objects.get(id=player_id)
+
+    dmg_koef_min = round(one_player.dmg_koef * 0.5, 1)
+    dmg_koef_max = round(one_player.dmg_koef * 1.5, 1)
+    armor_koef_min = round(one_player.armor_koef * 0.5, 1)
+    armor_koef_max = round(one_player.armor_koef * 1.5, 1)
+    hp_koef_min = round(one_player.hp_koef * 0.5, 1)
+    hp_koef_max = round(one_player.hp_koef * 1.5, 1)
+
     player_quests = side_quest.objects.filter(player=one_player)
 
     return render(request, 'game/player_info.html', {
         'one_player': one_player,
         'player_quests': player_quests,
+        'dmg_koef_min': dmg_koef_min,
+        'dmg_koef_max': dmg_koef_max,
+        'armor_koef_min': armor_koef_min,
+        'armor_koef_max': armor_koef_max,
+        'hp_koef_min': hp_koef_min,
+        'hp_koef_max': hp_koef_max,
         
         })
 

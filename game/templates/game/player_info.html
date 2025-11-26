@@ -10,9 +10,9 @@
 
     <h3>Povolání: <b>{{ one_player.povolani }}</b></h3>
 
-    <h4>Útok: <b>{{ one_player.dmg }}</b> ({{ one_player.dmg_koef }} / lvl) </h4>
-    <h4>Obrana: <b>{{ one_player.armor }}</b> ({{ one_player.armor_koef }} / lvl) </h4>
-    <h4>Životy: <b>{{ one_player.hp }}</b> ({{ one_player.hp_koef }} / lvl) </h4>
+    <h4>Útok: <b>{{ one_player.dmg_now }}</b> ({{ dmg_koef_min }} - {{ dmg_koef_max }} / lvl) </h4>
+    <h4>Obrana: <b>{{ one_player.armor_now }}</b> ({{ armor_koef_min }} - {{ armor_koef_max }} / lvl) </h4>
+    <h4>Životy: <b>{{ one_player.hp_now }}</b> ({{ hp_koef_min }} - {{ hp_koef_max }} / lvl) </h4>
 
 
 <h1>Vypít:</h1>
