@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from game.models import player
+from game.models import player, pocet_hracu
 
 
 # TADY PROBÍHÁ TAKOVÁ REGISTRACE HRÁČE A JEHO VÝBĚR POVOLÁNÍ
@@ -58,8 +58,28 @@ def tut_end(request):
         chosen_player.armor_koef = obrana_koef
         chosen_player.hp_now = hp
         chosen_player.hp_koef = hp_koef
+        chosen_player.hp_actual_fight = hp
         chosen_player.povolani = povolani
+
+        #Aktivace hráče:
+        chosen_player.active = True
         chosen_player.save()
+
+        # aktuální počet hráčů (uděláno dementně ale nechtělo se mi s tím srát)
+        pocet_hracu_full = player.objects.all().count()
+        pocet_hracu_off = player.objects.filter(active=False).count()
+        pocet_hracu_now = pocet_hracu_full - pocet_hracu_off
+
+        print("POCET HRACU FULL:", pocet_hracu_full)
+        print("POCET HRACU OFF:", pocet_hracu_off)
+        print("POCET HRACU NOW:", pocet_hracu_now)
+
+        pocet_hracu_data = pocet_hracu.objects.first()
+        pocet_hracu_data.pocet_hracu_now = pocet_hracu_now
+        pocet_hracu_data.pocet_hracu_full = pocet_hracu_full
+        pocet_hracu_data.pocet_hracu_off = pocet_hracu_off
+
+        pocet_hracu_data.save()
 
     return render(request, 'tutorialapp/end_tutorial.html', context={
         "chosen_player": chosen_player,

@@ -2,7 +2,16 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 import random
 
+class pocet_hracu(models.Model):
+    pocet_hracu_now = models.IntegerField(default=1)
+    pocet_hracu_full = models.IntegerField(default=1)
+    pocet_hracu_off = models.IntegerField(default=1)
+
+    def __str__(self):
+        return str(self.pocet_hracu_now)
+
 class player(models.Model):
+    active = models.BooleanField(default=False)
     name = models.CharField(max_length=100, blank=True)
     lvl = models.IntegerField(default=1, blank=True)
     xp = models.IntegerField(default=0, blank=True)
@@ -14,7 +23,7 @@ class player(models.Model):
     velky_kelimek = models.IntegerField(default=0, blank=True)
 
 
-    povolani = models.CharField(max_length=50, blank=True)
+    povolani = models.CharField(max_length=50, blank=True, default='nic')
 
     dmg = models.IntegerField(blank=True, default= 1)
     dmg_koef = models.FloatField(blank=True, default= 1)
@@ -27,6 +36,7 @@ class player(models.Model):
     hp = models.IntegerField(blank=True, default=1)
     hp_koef = models.FloatField(blank=True, default=1)
     hp_now = models.FloatField(blank=True, default=1)
+    hp_actual_fight = models.IntegerField(blank=True, default=1)
 
 
     # Uvnitř class player(models.Model):
@@ -53,6 +63,7 @@ class player(models.Model):
             self.dmg_now = round(self.dmg + ((self.dmg_koef * random_dmg) * self.lvl))
             self.armor_now = round(self.armor + ((self.armor_koef * random_armor) * self.lvl))
             self.hp_now = round(self.hp + ((self.hp_koef * random_hp) * self.lvl))
+            self.hp_actual_fight = self.hp_now
             self.save()
 
 

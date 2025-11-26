@@ -33,6 +33,9 @@
     Již vypito: <b>{{ one_player.velky_kelimek }}</b> velkých kelímků
 </form>
 
+<h1>Vstup do dungeonu:</h1>
+<button><a href="{% url 'dungeon' %}">Dungeon</a></button>
+
 <h1>Side quest</h1>
 <form action="{% url "sidequest" %}" method="post">
     {% csrf_token %}
@@ -69,6 +72,8 @@
         <hr>
     {% endif %}
 {% endfor %}
+
+
 
 
 {% endblock content %}

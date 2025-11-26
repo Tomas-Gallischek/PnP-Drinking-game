@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import player, side_quest, side_quest_databese
+from .models import player, pocet_hracu, side_quest, side_quest_databese
 
 
 class SideQuestInline(admin.TabularInline):
@@ -18,3 +18,4 @@ class PlayerAdmin(admin.ModelAdmin):
 admin.site.register(player, PlayerAdmin) 
 admin.site.register(side_quest)
 admin.site.register(side_quest_databese)
+admin.site.register(pocet_hracu)

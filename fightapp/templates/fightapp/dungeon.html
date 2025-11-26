@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<h1>Dungeon</h1>
+
+<form action="fight" method="post">
+    {% csrf_token %}
+    <button type="submit"> Souboj proti: {{ actual_boss.name }} </button>
+    <input type="hidden", name="boss_id", value="{{ actual_boss.id }}">
+</form>
+
+{% endblock content %}
