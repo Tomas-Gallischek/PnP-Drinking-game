@@ -2,13 +2,17 @@
 
 {% block content %}
 
-    <h2>Hráč: <b>{{ one_player.name }}</b></h2>
+    <h1>Hráč: <b>{{ one_player.name }}</b></h1>
 
-    <h2>ID: <b>{{ one_player.id }}</b></h2>
+    <h2>Level: <b>{{ one_player.lvl }}</b></h2>
 
-    <h3>Level: <b>{{ one_player.lvl }}</b></h3>
+    <h2>XP: <b>{{ one_player.xp }} / {{ one_player.xp_need }}</b></h2>
 
-    <h4>XP: <b>{{ one_player.xp }} / {{ one_player.xp_need }}</b></h4>
+    <h3>Povolání: <b>{{ one_player.povolani }}</b></h3>
+
+    <h4>Útok: <b>{{ one_player.dmg }}</b> ({{ one_player.dmg_koef }} / lvl) </h4>
+    <h4>Obrana: <b>{{ one_player.armor }}</b> ({{ one_player.armor_koef }} / lvl) </h4>
+    <h4>Životy: <b>{{ one_player.hp }}</b> ({{ one_player.hp_koef }} / lvl) </h4>
 
 
 <h1>Vypít:</h1>

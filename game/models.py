@@ -14,9 +14,13 @@ class player(models.Model):
 
 
     povolani = models.CharField(max_length=50, blank=True)
-    dmg = models.IntegerField(blank=True, default= 10)
-    armor = models.IntegerField(blank=True, default= 5)
-    hp = models.IntegerField(blank=True, default=100)
+
+    dmg = models.IntegerField(blank=True, default= 1)
+    dmg_koef = models.FloatField(blank=True, default= 1)
+    armor = models.IntegerField(blank=True, default= 1)
+    armor_koef = models.FloatField(blank=True, default= 1)
+    hp = models.IntegerField(blank=True, default=1)
+    hp_koef = models.FloatField(blank=True, default=1)
 
     # Uvnitř class player(models.Model):
     def add_xp(self, amount):
@@ -33,6 +37,7 @@ class player(models.Model):
             self.lvl += 1
             self.xp_need = int(xp_need * 1.2)
             self.save()
+
 
 
     def __str__(self):
