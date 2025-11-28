@@ -112,3 +112,14 @@ class side_quest_databese(models.Model):
 
     def __str__(self):
         return self.quest_name
+    
+
+class achievements(models.Model):
+    player = models.ForeignKey(player, on_delete=models.CASCADE, related_name='achievements')
+    total_dmg_delt = models.IntegerField(default=0, blank=True)
+    best_dmg_delt = models.IntegerField(default=0, blank=True)
+    total_dmg_taken = models.IntegerField(default=0, blank=True)
+
+
+    def __str__(self):
+        return f'Achievements of {self.player.name}'

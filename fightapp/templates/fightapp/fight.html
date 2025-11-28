@@ -3,5 +3,88 @@
 {% block content %}
 
 
+    <div class="container my-5">
+        <h1 class="text-center">⚔️ Výsledek Souboje ⚔️</h1>
+        
+        {% if fight_log %}
+            
+            {% comment %} Sekce s celkovým výsledkem {% endcomment %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2>{{ fight_log.boss.name }} – {{ fight_log.get_outcome_display }}</h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Čas souboje:</strong> {{ fight_log.fight_time|date:"d.m.Y H:i:s" }}</p>
+                    <p><strong>Počet hráčů:</strong> {{ fight_log.player_count }}</p>
+                    <p><strong>Celkem uděleno poškození hráči:</strong> {{ fight_log.total_damage_dealt_by_players }}</p>
+                    <p><strong>Celkem utrpěno poškození hráči:</strong> {{ fight_log.total_damage_received_by_players }}</p>
+                    <p><strong>Konečné HP Bosse:</strong> {{ fight_log.final_boss_hp }}</p>
+                    
+                    {% if fight_log.outcome == 'players' %}
+                        <p class="h4 text-success">🎉 VÍTĚZSTVÍ HRÁČŮ! Boss byl poražen. 🎉</p>
+                    {% else %}
+                        <p class="h4 text-danger">💀 BOSS VÍTĚZÍ! Všichni hráči byli poraženi. 💀</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <hr>
+
+            {# Sekce s detailním průběhem souboje (Log tahů) #}
+            <h2 class="mt-5 mb-3">📜 Detailní Průběh Souboje (Tah za Tahem)</h2>
+
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Tah</th>
+                        <th>Útočník</th>
+                        <th>Cíl</th>
+                        <th>Poškození</th>
+                        <th>HP Bosse Po</th>
+                        <th>HP Cíle Po</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for turn in fight_log.turn_logs.all %}
+                        <tr>
+                            <td>{{ turn.turn_number }}</td>
+                            
+                            <td>
+                                {% if turn.attacker_is_boss %}
+                                    <strong>{{ fight_log.boss.name }}</strong>
+                                {% else %}
+                                    {{ turn.attacker_player.name }}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if not turn.attacker_is_boss %}
+                                    {{ fight_log.boss.name }}
+                                {% else %}
+                                    {{ turn.target_player.name }}
+                                {% endif %}
+                            </td>
+                            
+                            <td class="fw-bold">{{ turn.damage_dealt }}</td>
+                            <td>{{ turn.boss_hp_after }}</td>
+                            <td>
+                                {% if turn.target_player_hp_after is not None %}
+                                    {{ turn.target_player_hp_after }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                Pro souboj nebyly nalezeny žádné logy. Spusťte prosím souboj.
+            </div>
+        {% endif %}
+
+    </div>
 
 {% endblock content %}

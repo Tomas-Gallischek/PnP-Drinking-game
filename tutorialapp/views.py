@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from game.models import player, pocet_hracu
+from game.models import player, pocet_hracu, achievements
 
 
 # TADY PROBÍHÁ TAKOVÁ REGISTRACE HRÁČE A JEHO VÝBĚR POVOLÁNÍ
@@ -13,21 +13,24 @@ def tut_end(request):
 
         if povolani == 'mag':
             dmg = 18
-            dmg_koef = 9
+            # dmg_koef = 9 (původní hodnota)
+            dmg_koef = 18
             obrana = 2
             obrana_koef = 0.5
             hp = 70
             hp_koef = 18
         elif povolani == 'valecnik': 
             dmg = 12
-            dmg_koef = 4
+            # dmg_koef = 4
+            dmg_koef = 8
             obrana = 10
             obrana_koef = 2.2
             hp = 120
             hp_koef = 35
         elif povolani == 'hunter':
             dmg = 14
-            dmg_koef = 6
+            # dmg_koef = 6
+            dmg_koef = 12
             obrana = 6
             obrana_koef = 1.5
             hp = 90
@@ -64,6 +67,14 @@ def tut_end(request):
         #Aktivace hráče:
         chosen_player.active = True
         chosen_player.save()
+
+        #Založení achievemts pro hráče
+        achievements.objects.create(
+            player=chosen_player,
+            best_dmg_delt=0,
+            total_dmg_delt=0,
+            total_dmg_taken=0,
+        )
 
         # aktuální počet hráčů (uděláno dementně ale nechtělo se mi s tím srát)
         pocet_hracu_full = player.objects.all().count()
