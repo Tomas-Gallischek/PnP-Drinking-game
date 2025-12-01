@@ -5,13 +5,17 @@ from tutorialapp import models
 from .models import boss, FightLog, TurnLog, boss_names_descriptions
 from game.models import player, pocet_hracu, achievements
 from django.db.models import Max
+from colorama import init, Fore, Style
 
 
 def fight(request):
     if request.method == "POST":
-        print("Zápas probíhá...")
+
         boss_id = request.POST.get("boss_id")
-        print("Boss ID:", boss_id)
+        if not boss_id:
+            boss_id = boss.objects.filter(defeated=False).first().id
+
+
         
     # Načtení dat a inicializace
     actual_boss = boss.objects.filter(id=boss_id).first()
@@ -25,12 +29,6 @@ def fight(request):
     
     # Inicializace proměnných pro boj
     players = player.objects.filter(active=True)
-    
-    print("Boss name: ", actual_boss.name, "Boss stats - Dmg:", boss_dmg_base, "Armor:", boss_armor_base, "HP:", boss_hp)
-    print("Do boje nastupují hráči:")
-
-    for p in players:
-        print("Hráč:", p.name, "Dmg:", p.dmg_now, "Armor:", p.armor_now, "HP:", p.hp_now)
 
     # --- INICIALIZACE LOGU BOJE ---
     # Vytvoření záznamu o celém boji
@@ -62,8 +60,7 @@ def fight(request):
                 break # Všichni hráči jsou mrtví, konec boje
                 
             current_player = random.choice(live_players) 
-            
-            print("Hráč", current_player.name, "zaútočí jako první!" "stats - Dmg:", current_player.dmg_now, "Armor:", current_player.armor_now, "HP:", current_player.hp_actual_fight)
+
 
             # Výpočet poškození hráče a brnění bosse s rozptylem
             current_player_dmg_roll = round(current_player.dmg_now * (random.uniform(0.8, 1.2)))
@@ -105,11 +102,9 @@ def fight(request):
             player_achievement.save()
 
 
-            print("Hráč", current_player.name, "udělil bossovi", dmg_delt, "poškození! Boss má nyní", max(0, boss_hp), "HP.")
-
         else:
             # TAH BOSSE
-            print("Boss", actual_boss.name, "zaútočí jako první!")
+
 
             # Filtrování mrtvých hráčů
             live_players = players.filter(hp_actual_fight__gt=0)
@@ -117,7 +112,6 @@ def fight(request):
                 break # Všichni hráči jsou mrtví, konec boje
                 
             target_player = random.choice(live_players) 
-            print("Boss útočí na hráče", target_player.name, "stats - Dmg:", target_player.dmg_now, "Armor:", target_player.armor_now, "HP:", target_player.hp_actual_fight)
 
             # Výpočet poškození bosse a brnění hráče s rozptylem
             boss_dmg_roll = round(current_boss_dmg * (random.uniform(0.8, 1.2)))
@@ -154,8 +148,6 @@ def fight(request):
             player_achievement.total_dmg_taken += boss_dmg_roll
             player_achievement.save()
 
-            print("Boss", actual_boss.name, "udělil hráči", target_player.name, "poškození", dmg_delt, "! Hráč má nyní", max(0, target_player.hp_actual_fight), "HP.")
-
         # Inkrementace čítače tahu a nové iniciativy
         turn_counter += 1
         players_iniciative = random.randint(1, 100)
@@ -164,12 +156,12 @@ def fight(request):
     # --- VYHODNOCENÍ VÍTĚZE A AKTUALIZACE LOGU ---
     if boss_hp <= 0:
         winner = "players"
-        print("Boss", actual_boss.name, "byl poražen!")
+        print(Fore.GREEN + "Boss", actual_boss.name, "byl poražen!" + Style.RESET_ALL)
         actual_boss.defeated = True
         actual_boss.save()
     else:
         winner = "boss"
-        print("Všichni hráči byli poraženi! Boss", actual_boss.name, "vítězí!")
+        print(Fore.RED + "Boss", actual_boss.name, "vítězí!" + Style.RESET_ALL)
         
     # Aktualizace hlavního záznamu boje
     fight_log.outcome = winner
@@ -192,7 +184,7 @@ def fight(request):
         next_patro = patro + 1
         boss_names = boss_names_descriptions.objects.get(patro=next_patro).name
         next_lvl = actual_boss.lvl + 1
-        next_reward = actual_boss.reward_xp * 1.2
+        next_reward = actual_boss.reward_xp * 1.1
         hraci = pocet_hracu.objects.first()
         pocet_hracu_now = hraci.pocet_hracu_now
         hraci.all_stats_counter()
@@ -203,10 +195,10 @@ def fight(request):
             description = "Lorem Ipsum",
             defeated = False,
             lvl = next_lvl,
-            dmg = ((hraci.all_players_dmg) / pocet_hracu_now) * 1.1,
-            armor = ((hraci.all_players_armor) / pocet_hracu_now) * 1.1,
-            hp = ((hraci.all_players_hp) / pocet_hracu_now) * 1.1,
-            reward_xp = next_reward
+            dmg = ((hraci.all_players_dmg) / pocet_hracu_now)* 0.8,
+            armor = ((hraci.all_players_armor) / pocet_hracu_now) * 0.6,
+            hp = ((hraci.all_players_hp) / pocet_hracu_now)* 0.6,
+            reward_xp = round(next_reward)
         )
         print(f"Nový boss: {boss_names} Patro: {next_patro} Level: {next_lvl} Reward XP: {next_reward}"),
     

@@ -1,8 +1,10 @@
+import re
 from django.shortcuts import render, redirect
 
-from fightapp.models import boss, boss_names_descriptions
+from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
 from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu
 import random
+from fightapp.views import fight
 
 
 def quest_done(request):
@@ -225,9 +227,11 @@ def reset(request):
             )
             new_player.save()
 
-            new_achivments = achievements.objects.create(
-                player=new_player,
-            )
+            achievements.objects.all().delete()
+            for p in player.objects.all():
+                new_achivments = achievements.objects.create(
+                    player=p,
+                )
 
             boss.objects.all().delete()
             first_boss_name = boss_names_descriptions.objects.get(patro=1).name
@@ -246,3 +250,57 @@ def reset(request):
             print(f"Celkem hráčů: {player.objects.count()}")
         return redirect('index')
     return redirect('index')
+
+
+
+def test(request):
+    if request.method == 'POST':
+        reset(request)
+        print("PROBĚHLO PROMAZÁNÍ DATABÁZE")
+        actual_patro = 1
+        rounds = 1
+        wins = 0
+        lose = 0
+        draw = 0
+
+        while actual_patro < 25 or actual_boss.name == 'KONEC HRY':
+            actual_boss = boss.objects.filter(defeated=False).first()
+            actual_patro = actual_boss.patro
+            fight(request)
+
+            all_players = player.objects.all()
+            for p in all_players:
+                random_xp = random.randint(20, 100)
+                p.add_xp(round(random_xp))
+                p.save()
+            rounds += 1
+            print(f"Round {rounds} completed.")
+            print(f"Aktuální patro: {actual_patro}")
+            
+
+            actual_fight = FightLog.objects.filter(boss=actual_boss).last()
+            if actual_fight.outcome == 'players':
+                wins += 1
+            elif actual_fight.outcome == 'draw':
+                draw += 1
+            else:
+                lose += 1
+
+            
+
+        all_players = player.objects.all()
+        all_players = all_players.order_by('score').reverse()
+        all_achivements = achievements.objects.all()
+        all_achivements = all_achivements.order_by('total_dmg_delt').reverse()
+        all_bosses = boss.objects.all()
+        
+        return render(request, 'game/test_stats.html', context={
+            'all_players': all_players,
+            'all_achivements': all_achivements,
+            'all_bosses': all_bosses,
+            'rounds': rounds,
+            'wins': wins,
+            'lose': lose,
+            'draw': draw,
+        })
+

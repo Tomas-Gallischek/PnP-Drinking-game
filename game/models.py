@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 import random
+from colorama import init, Fore, Style
 
 class pocet_hracu(models.Model):
     pocet_hracu_now = models.IntegerField(default=1)
@@ -74,16 +75,14 @@ class player(models.Model):
             xp -= xp_need
             self.xp = xp
             self.lvl += 1
-            self.xp_need = int(xp_need * 1.1)
+            self.xp_need = int(round((xp_need + 50)))
             self.save()
+            print(Fore.LIGHTCYAN_EX + f"{self.name} level up to {self.lvl}!" + Style.RESET_ALL)
 
             # Díky tomuto bude definitivní koeficient náhodný při každém levelupu  (rozmezí 50%)
             random_dmg = random.uniform(0.5, 1.5)
             random_armor = random.uniform(0.5, 1.5)
             random_hp = random.uniform(0.5, 1.5)
-
-            print(f"Random dmg koef: {self.dmg_koef}, Random armor koef: {self.armor_koef}, Random hp koef: {self.hp_koef}")
-            print(f"Random dmg: {random_dmg}, Random armor: {random_armor}, Random hp: {random_hp}")
 
             self.dmg_now += round(self.dmg + ((self.dmg_koef * random_dmg) * self.lvl))
             self.armor_now += round(self.armor + ((self.armor_koef * random_armor) * self.lvl))

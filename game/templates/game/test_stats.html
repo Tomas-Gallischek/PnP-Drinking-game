@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+
+{% block content %} 
+
+<h1>Test Stats</h1>
+
+---
+
+## Celkové statistiky 📊
+
+{# Definiční list je skvělý pro páry Klíč/Hodnota, nahrazuje stávající H3 #}
+<dl>
+    <dt><strong>POČET KOL:</strong></dt>
+    <dd>{{ rounds }}</dd>
+    
+    <dt><strong>VÝHRY:</strong></dt>
+    <dd>{{ wins }}</dd>
+    
+    <dt><strong>PROHRY:</strong></dt>
+    <dd>{{ lose }}</dd>
+    
+    <dt><strong>REMÍZY:</strong></dt>
+    <dd>{{ draw }}</dd>
+</dl>
+
+---
+
+<h2>Hráči:</h2>
+{# Vytvoříme JEDNU tabulku pro všechny hráče #}
+<table border="1" style="width:100%; text-align:left;">
+    <thead>
+        <tr>
+            <th>Jméno</th>
+            <th>Povolání</th>
+            <th>Skóre</th>
+            <th>Level</th>
+            <th>XP</th>
+            <th>Životy</th>
+            <th>DMG</th>
+            <th>Armor</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for player in all_players %}
+        <tr>
+            <td><strong>{{ player.name }}</strong></td>
+            <td><strong>{{ player.povolani }}</strong></td>
+            <td>{{ player.score}} </td>
+            <td>{{ player.lvl }}</td>
+            <td>{{ player.xp }}</td>
+            <td>{{ player.hp_now }}</td>
+            <td>{{ player.dmg_now }}</td>
+            <td>{{ player.armor_now }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+---
+
+<h2>Úspěchy hráčů:</h2>
+{# Jedna tabulka pro úspěchy. Předpokládám, že all_achivements obsahuje podobná data jako all_players (nebo je lze snadno spojit), ale pro zachování původní struktury ponecháme samostatnou tabulku #}
+<table border="1" style="width:100%; text-align:left;">
+    <thead>
+        <tr>
+            <th>Hráč</th>
+            <th>Udělené poškození CELKEM</th>
+            <th>DMG REKORD</th>
+            <th>Utržené poškození CELKEM</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for achievement in all_achivements %}
+        <tr>
+            <td><strong>{{ achievement.player }}</strong></td>
+            <td>{{ achievement.total_dmg_delt }}</td>
+            <td>{{ achievement.best_dmg_delt }}</td>
+            <td>{{ achievement.total_dmg_taken }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+---
+
+<h3>BOSSOVÉ:</h3>
+{# Vytvoříme JEDNU tabulku pro všechny bossy #}
+<table border="1" style="width:100%; text-align:left;">
+    <thead>
+        <tr>
+            <th>Jméno</th>
+            <th>Patro</th>
+            <th>Level</th>
+            <th>Životy</th>
+            <th>DMG</th>
+            <th>Armor</th>
+            <th>XP REWARD</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for boss in all_bosses %}
+        <tr>
+            <td><strong>{{ boss.name }}</strong></td>
+            <td>{{ boss.patro}}</td>
+            <td>{{ boss.lvl }}</td>
+            <td>{{ boss.hp }}</td>
+            <td>{{ boss.dmg }}</td>
+            <td>{{ boss.armor }}</td>
+            <td>{{ boss.xp_reward }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock content %}
