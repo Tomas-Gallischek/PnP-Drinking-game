@@ -7,6 +7,27 @@ class pocet_hracu(models.Model):
     pocet_hracu_full = models.IntegerField(default=1)
     pocet_hracu_off = models.IntegerField(default=1)
 
+    all_players_dmg = models.IntegerField(default=1, blank=True)
+    all_players_armor = models.IntegerField(default=1, blank=True)
+    all_player_hp = models.IntegerField(default=1, blank=True)
+
+
+    def all_stats_counter(self):
+        all_players = player.objects.all()
+        all_dmg = 0
+        all_armor = 0
+        all_hp = 0
+        for one in all_players:
+            all_dmg += one.dmg_now 
+            all_armor += one.armor_now
+            all_hp += one.hp_now
+        self.all_players_dmg = all_dmg
+        self.all_players_armor = all_armor
+        self.all_players_hp = all_hp
+        self.save()
+    
+    # ZAPLATIT SI COPILOTA
+
     def __str__(self):
         return str(self.pocet_hracu_now)
 
@@ -16,6 +37,7 @@ class player(models.Model):
     lvl = models.IntegerField(default=1, blank=True)
     xp = models.IntegerField(default=0, blank=True)
     xp_need = models.IntegerField(default=50, blank=True)
+    score = models.IntegerField(default=0, blank=True)
     energie = models.IntegerField(default=100, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)])
 
     panak = models.IntegerField(default=0, blank=True)
@@ -66,6 +88,10 @@ class player(models.Model):
             self.hp_actual_fight = self.hp_now
             self.save()
 
+    def score_counter(self):
+        stats = achievements.objects.get(player=self)
+        self.score = stats.total_dmg_delt + stats.total_dmg_taken
+        self.save()
 
 
     def __str__(self):

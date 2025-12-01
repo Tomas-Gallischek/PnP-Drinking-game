@@ -1,7 +1,8 @@
 import random
+from typing import Self
 from django.shortcuts import render
 from tutorialapp import models
-from .models import boss, FightLog, TurnLog 
+from .models import boss, FightLog, TurnLog, boss_names_descriptions
 from game.models import player, pocet_hracu, achievements
 from django.db.models import Max
 
@@ -177,12 +178,38 @@ def fight(request):
     fight_log.save()
     # ---------------------------------------------
 
-    # Reset HP hráčů po boji
+    # VĚCI PO BOJI:
     for p in players:
         p.hp_actual_fight = p.hp_now
+        p.score_counter()
         p.save()
 
+
     turn_log = TurnLog.objects.filter(fight=fight_log).order_by('damage_dealt')
+    
+    if winner == "players":
+        # Vytvoření dalšího bosse
+
+        boss_names = boss_names_descriptions.objects.get(patro=(actual_boss.patro)+1).name
+        next_patro = actual_boss.patro + 1
+        next_lvl = actual_boss.lvl + 1
+        next_reward = actual_boss.reward_xp * 1.1
+        hraci = pocet_hracu.objects.first()
+        pocet_hracu_now = hraci.pocet_hracu_now
+        hraci.all_stats_counter()
+
+        boss.objects.create(
+            name = boss_names,
+            patro = next_patro,
+            description = "Lorem Ipsum",
+            defeated = False,
+            lvl = next_lvl,
+            dmg = ((hraci.all_players_dmg) / pocet_hracu_now) * 1.1,
+            armor = ((hraci.all_players_armor) / pocet_hracu_now) * 1.1,
+            hp = ((hraci.all_players_hp) / pocet_hracu_now) * 1.1,
+            reward_xp = next_reward
+        )
+        print(f"Nový boss: {boss_names} Patro: {next_patro} Level: {next_lvl} Reward XP: {next_reward}"),
 
     return render(request, 'fightapp/fight.html', context={
         # Zde můžete přidat fight_log.id nebo fight_log pro zobrazení výsledků v šabloně

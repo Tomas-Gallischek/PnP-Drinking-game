@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect # Přidat 'redirect'
-from .models import player, side_quest, side_quest_databese
+from .models import player, side_quest, side_quest_databese, achievements
 import random
 
 
@@ -147,9 +147,8 @@ def player_info(request, player_id):
 
 def leaderboard(request):
     all_players = player.objects.all()
-    all_players = all_players.order_by('xp').reverse()
+    all_players = all_players.order_by('score').reverse()
 
-    
 
     return render(request, 'game/leaderboard.html', {
         'all_players': all_players})

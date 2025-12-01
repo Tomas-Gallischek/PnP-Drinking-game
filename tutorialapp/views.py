@@ -22,7 +22,7 @@ def tut_end(request):
         elif povolani == 'valecnik': 
             dmg = 12
             # dmg_koef = 4
-            dmg_koef = 8
+            dmg_koef = 6
             obrana = 10
             obrana_koef = 2.2
             hp = 120

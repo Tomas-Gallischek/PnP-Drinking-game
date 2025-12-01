@@ -1,6 +1,12 @@
 from django.db import models
 from game.models import player
 
+class boss_names_descriptions(models.Model):
+    patro = models.IntegerField(default=1)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    def __str__(self):
+        return f"{self.patro} {self.name}"
 
 class boss(models.Model):
     name = models.CharField(max_length=100)
