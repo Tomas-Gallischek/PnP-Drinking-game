@@ -1,5 +1,7 @@
-from django.shortcuts import render, redirect # Přidat 'redirect'
-from .models import player, side_quest, side_quest_databese, achievements
+from django.shortcuts import render, redirect
+
+from fightapp.models import boss, boss_names_descriptions
+from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu
 import random
 
 
@@ -155,3 +157,92 @@ def leaderboard(request):
 
 def index(request):
     return render(request, 'game/index.html')
+
+
+def reset(request):
+
+
+    if request.method == 'POST':
+        player.objects.all().delete()
+        random_pocet_hracu = random.randint(3, 10)
+        for i in range(random_pocet_hracu):
+            moznosti_povolani = ['mag', 'valecnik', 'hunter']
+            povolani = random.choice(moznosti_povolani)
+            if povolani == 'mag':
+                dmg = 18
+                # dmg_koef = 9 (původní hodnota)
+                dmg_koef = 18
+                obrana = 2
+                obrana_koef = 0.5
+                hp = 70
+                hp_koef = 18
+            elif povolani == 'valecnik': 
+                dmg = 12
+                # dmg_koef = 4
+                dmg_koef = 6
+                obrana = 10
+                obrana_koef = 2.2
+                hp = 120
+                hp_koef = 35
+            elif povolani == 'hunter':
+                dmg = 14
+                # dmg_koef = 6
+                dmg_koef = 12
+                obrana = 6
+                obrana_koef = 1.5
+                hp = 90
+                hp_koef = 24
+            else:
+                povolani = 'obycejny clovek'
+                dmg = 1
+                dmg_koef = 1
+                obrana = 1
+                obrana_koef = 1
+                hp = 1
+                hp_koef = 1
+
+            new_player = player.objects.create(
+                active = True,
+                name=random.choice(jmena_hracu.objects.values_list('name', flat=True)),
+                xp=0,
+                lvl=1,
+                score=0,
+                energie=100,
+                povolani=povolani,
+                dmg=dmg,
+                dmg_koef=dmg_koef,
+                dmg_now=dmg,
+                armor=obrana,
+                armor_koef=obrana_koef,
+                armor_now=obrana,
+                hp=hp,
+                hp_koef=hp_koef,
+                hp_now=hp,
+                hp_actual_fight=hp,
+                panak=0,
+                maly_kelimek=0,
+                velky_kelimek=0,
+            )
+            new_player.save()
+
+            new_achivments = achievements.objects.create(
+                player=new_player,
+            )
+
+            boss.objects.all().delete()
+            first_boss_name = boss_names_descriptions.objects.get(patro=1).name
+            boss.objects.create(
+                name = first_boss_name,
+                patro = 1,
+                description = "Lorem Ipsum",
+                defeated = False,
+                lvl = 1,
+                dmg = 15,
+                armor = 5,
+                hp = 200,
+                reward_xp = 200
+            )
+            print(f"Hráč {new_player.name} vytvořen.")
+            print(f"Celkem hráčů: {player.objects.count()}")
+        return redirect('index')
+    return redirect('index')

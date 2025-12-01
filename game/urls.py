@@ -11,4 +11,5 @@ urlpatterns = [
     path('quest_failed', views.quest_failed, name='quest_failed'),
     path('nastenka', views.nastenka, name='nastenka'),
     path('quest_done', views.quest_done, name='quest_done'),
+    path('reset', views.reset, name='reset'),
 ]

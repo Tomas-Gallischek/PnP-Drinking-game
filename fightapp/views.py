@@ -15,6 +15,7 @@ def fight(request):
         
     # Načtení dat a inicializace
     actual_boss = boss.objects.filter(id=boss_id).first()
+    patro = actual_boss.patro
     boss_dmg_base = actual_boss.dmg # Uložení základní hodnoty DMG bosse
     boss_armor_base = actual_boss.armor # Uložení základní hodnoty Armor bosse
     
@@ -184,16 +185,14 @@ def fight(request):
         p.score_counter()
         p.save()
 
-
     turn_log = TurnLog.objects.filter(fight=fight_log).order_by('damage_dealt')
-    
+
     if winner == "players":
         # Vytvoření dalšího bosse
-
-        boss_names = boss_names_descriptions.objects.get(patro=(actual_boss.patro)+1).name
-        next_patro = actual_boss.patro + 1
+        next_patro = patro + 1
+        boss_names = boss_names_descriptions.objects.get(patro=next_patro).name
         next_lvl = actual_boss.lvl + 1
-        next_reward = actual_boss.reward_xp * 1.1
+        next_reward = actual_boss.reward_xp * 1.2
         hraci = pocet_hracu.objects.first()
         pocet_hracu_now = hraci.pocet_hracu_now
         hraci.all_stats_counter()
@@ -210,6 +209,10 @@ def fight(request):
             reward_xp = next_reward
         )
         print(f"Nový boss: {boss_names} Patro: {next_patro} Level: {next_lvl} Reward XP: {next_reward}"),
+    
+        for p in players:
+            p.add_xp(actual_boss.reward_xp)
+            p.save()
 
     return render(request, 'fightapp/fight.html', context={
         # Zde můžete přidat fight_log.id nebo fight_log pro zobrazení výsledků v šabloně

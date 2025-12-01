@@ -2,6 +2,10 @@
 
 {% block content %}
 
+<form action="reset" method="post">{% csrf_token %}<button type="submit">Reset</button></form>
+
+<form action="test" method="post">{% csrf_token %}<button type="submit">Test</button></form>
+
 {% endblock content %}
 
 

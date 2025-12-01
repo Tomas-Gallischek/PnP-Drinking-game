@@ -74,7 +74,7 @@ class player(models.Model):
             xp -= xp_need
             self.xp = xp
             self.lvl += 1
-            self.xp_need = int(xp_need * 1.2)
+            self.xp_need = int(xp_need * 1.1)
             self.save()
 
             # Díky tomuto bude definitivní koeficient náhodný při každém levelupu  (rozmezí 50%)
@@ -82,9 +82,12 @@ class player(models.Model):
             random_armor = random.uniform(0.5, 1.5)
             random_hp = random.uniform(0.5, 1.5)
 
-            self.dmg_now = round(self.dmg + ((self.dmg_koef * random_dmg) * self.lvl))
-            self.armor_now = round(self.armor + ((self.armor_koef * random_armor) * self.lvl))
-            self.hp_now = round(self.hp + ((self.hp_koef * random_hp) * self.lvl))
+            print(f"Random dmg koef: {self.dmg_koef}, Random armor koef: {self.armor_koef}, Random hp koef: {self.hp_koef}")
+            print(f"Random dmg: {random_dmg}, Random armor: {random_armor}, Random hp: {random_hp}")
+
+            self.dmg_now += round(self.dmg + ((self.dmg_koef * random_dmg) * self.lvl))
+            self.armor_now += round(self.armor + ((self.armor_koef * random_armor) * self.lvl))
+            self.hp_now += round(self.hp + ((self.hp_koef * random_hp) * self.lvl))
             self.hp_actual_fight = self.hp_now
             self.save()
 
@@ -149,3 +152,9 @@ class achievements(models.Model):
 
     def __str__(self):
         return f'Achievements of {self.player.name}'
+    
+class jmena_hracu(models.Model):
+    name = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.name

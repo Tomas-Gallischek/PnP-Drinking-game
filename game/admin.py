@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import player, pocet_hracu, side_quest, side_quest_databese, achievements
+from .models import player, pocet_hracu, side_quest, side_quest_databese, achievements, jmena_hracu
 
 
 class SideQuestInline(admin.TabularInline):
@@ -25,4 +25,5 @@ admin.site.register(pocet_hracu)
 admin.site.register(side_quest)
 admin.site.register(side_quest_databese)
 admin.site.register(achievements)
+admin.site.register(jmena_hracu)
 # Register your models here.
