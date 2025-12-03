@@ -5,39 +5,50 @@
     <h2>Hráč: <b>{{ player_info.name }}</b></h2>
     
     <h3>Náhodný vedlejší úkol 1:</h3>
-    <h4>{{ random_quest_1.quest_name }}</h4>
-    <p>{{ random_quest_1.description }}</p>
-    <p>Odměna: {{ random_quest_1.xp_reward }} XP</p>
+    <h4>{{ random_quest_alko.quest_name }}</h4>
+    <p>{{ random_quest_alko.description }}</p>
+    <p>Odměna: {{ random_quest_alko.xp_reward }} XP</p>
 
     <form action="{% url "take_quest" %}" method="post">
         {% csrf_token %}
-        <input type="hidden" name="quest_id" value="{{ random_quest_1.id }}">
+        <input type="hidden" name="quest_id" value="{{ random_quest_alko.id }}">
         <input type="hidden" name="player_id" value="{{ player_info.id }}">
         <button type="submit">Přijmout tento úkol</button>
     </form>
 
     <h3>Náhodný vedlejší úkol 2:</h3>
-    <h4>{{ random_quest_2.quest_name }}</h4>
-    <p>{{ random_quest_2.description }}</p>
-    <p>Odměna: {{ random_quest_2.xp_reward }} XP</p>
+    <h4>{{ random_quest_nealko.quest_name }}</h4>
+    <p>{{ random_quest_nealko.description }}</p>
+    <p>Odměna: {{ random_quest_nealko.xp_reward }} XP</p>
 
     <form action="{% url "take_quest" %}" method="post">
         {% csrf_token %}
-        <input type="hidden" name="quest_id" value="{{ random_quest_2.id }}">
+        <input type="hidden" name="quest_id" value="{{ random_quest_nealko.id }}">
         <input type="hidden" name="player_id" value="{{ player_info.id }}">
         <button type="submit">Přijmout tento úkol</button>
     </form>
 
     <h3>Náhodný vedlejší úkol 3:</h3>
-    <h4>{{ random_quest_3.quest_name }}</h4>
-    <p>{{ random_quest_3.description }}</p>
-    <p>Odměna: {{ random_quest_3.xp_reward }} XP</p>
+    <h4>{{ random_quest_coop.quest_name }}</h4>
+    <p>{{ random_quest_coop.description }}</p>
+    <p>Odměna: {{ random_quest_coop.xp_reward }} XP</p>
 
     <form action="{% url "take_quest" %}" method="post">
         {% csrf_token %}
-        <input type="hidden" name="quest_id" value="{{ random_quest_3.id }}">
+        <input type="hidden" name="quest_id" value="{{ random_quest_coop.id }}">
         <input type="hidden" name="player_id" value="{{ player_info.id }}">
         <button type="submit">Přijmout tento úkol</button>
+
+        <label for="coop_player">Vyber si parťáka:</label>
+    
+        <select id="coop_player" name="coop_player_id">
+            <option value="" disabled selected>-- Vyberte možnost --</option>
+            
+            {% for one in active_players %}
+            <option value="{{one.id}}" name="coop_player_id">{{one.name}}</option>
+            {% endfor %}
+
+        </select>
     </form>
 
 

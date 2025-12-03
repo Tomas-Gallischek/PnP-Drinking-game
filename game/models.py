@@ -110,7 +110,15 @@ class side_quest(models.Model):
         ('epic', 'Epic'),
         ('legendary', 'Legendary'),
     ]
+
+    quest_type_choices = [
+    ('alko', 'Alko'),
+    ('nealko', 'Nealko'),
+    ('coop', 'Coop')
+    ]
     player = models.ForeignKey(player, on_delete=models.CASCADE, related_name='side_quests')
+    player_coop = models.CharField(max_length=100, blank=True)
+    quest_type = models.CharField(max_length=100, blank=True, choices=quest_type_choices)
     quest_name = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     xp_reward = models.IntegerField(default=0, blank=True)
@@ -120,7 +128,7 @@ class side_quest(models.Model):
 
 
     def __str__(self):
-        return self.quest_name
+        return f"{self.quest_name} - {self.player.name} + {self.player_coop}"
 
 # MOŽNOSTI ÚKOLŮ
 class side_quest_databese(models.Model):
@@ -132,14 +140,22 @@ class side_quest_databese(models.Model):
         ('epic', 'Epic'),
         ('legendary', 'Legendary'),
     ]
+
+    quest_type_choices = [
+        ('alko', 'Alko'),
+        ('nealko', 'Nealko'),
+        ('coop', 'Coop')
+    ]
+
     quest_name = models.CharField(max_length=100, blank=True)
+    quest_type = models.CharField(max_length=100, blank=True, choices=quest_type_choices)
     description = models.TextField(blank=True)
     xp_reward = models.IntegerField(default=0, blank=True)
     rarity = models.CharField(max_length=50, blank=True, choices=rarity_choices)
 
 
     def __str__(self):
-        return self.quest_name
+        return f"{self.quest_name} ({self.quest_type})"
     
 
 class achievements(models.Model):
@@ -147,6 +163,7 @@ class achievements(models.Model):
     total_dmg_delt = models.IntegerField(default=0, blank=True)
     best_dmg_delt = models.IntegerField(default=0, blank=True)
     total_dmg_taken = models.IntegerField(default=0, blank=True)
+    death_counter = models.IntegerField(default=0, blank=True)
 
 
     def __str__(self):

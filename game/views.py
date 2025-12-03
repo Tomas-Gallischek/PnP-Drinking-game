@@ -1,6 +1,7 @@
+from hmac import new
 import re
 from django.shortcuts import render, redirect
-
+from django.db.models import Q
 from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
 from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu
 import random
@@ -10,29 +11,30 @@ from fightapp.views import fight
 def quest_done(request):
     if request.method == 'POST':
         user=request.user
-        advisor = player.objects.get(id=user.id)
         quest_id = request.POST.get('quest_id')
         completed_quest = side_quest.objects.get(id=quest_id)
-        one_player = completed_quest.player
+        main_player = completed_quest.player
+        coop_player = completed_quest.player_coop or None
         reward = completed_quest.xp_reward
 
-
-        one_player.xp += reward
+        if coop_player:
+            coop_player_instance = player.objects.get(name=coop_player)
+            player.add_xp(coop_player_instance, reward)
+            coop_player_instance.save()
+        player.add_xp(main_player, reward)
         completed_quest.done = True
-        completed_quest.advisor = advisor.name
+
 
         completed_quest.save()
-        one_player.save()
+        main_player.save()
 
-        return redirect('nastenka')
-    
-    return redirect('index')
+    return redirect('leaderboard')
 
 def nastenka(request):
     if request.method == 'POST':
         user=request.POST.get('player_id')
         one_player = player.objects.get(id=user)
-        all_quests = side_quest.objects.exclude(player=one_player)
+        all_quests = side_quest.objects.exclude(Q(player=one_player) | Q(player_coop=one_player.name))
 
 
         return render(request, 'game/nastenka.html', context={
@@ -47,9 +49,13 @@ def quest_failed(request):
         user=request.POST.get('player_id')
         one_player = player.objects.get(id=user)
         quest_id = request.POST.get('quest_id')
-        failed_quest = side_quest.objects.get(id=quest_id, player=one_player)
-
+        failed_quest = side_quest.objects.get(id=quest_id)
+        coop_player = failed_quest.player_coop or None
         failed_quest.delete()
+        print(f"coop_player: {coop_player}")
+        print(f"one_player: {one_player}")
+        print(f"failed_quest: {failed_quest}")
+
 
         return redirect('player_info', player_id=one_player.id)
     
@@ -57,20 +63,28 @@ def quest_failed(request):
 
 def take_quest(request):
     if request.method == 'POST':
-        user=request.POST.get('player_id')
+        user=request.POST.get('player_id') or None
+        user_coop = request.POST.get('coop_player_id') or None
         one_player = player.objects.get(id=user)
+        coop_player = player.objects.get(id=user_coop) if user_coop else None 
+        print(f"Quest pro hráče: {user}, coop hráč: {user_coop}")
+
         quest_id = request.POST.get('quest_id')
         selected_quest = side_quest_databese.objects.get(id=quest_id)
-        user_quests = side_quest.objects.filter(player=one_player)
 
-        user_quests.create(
+        new_quest = side_quest.objects.create(
             player=one_player,
+            player_coop= coop_player.name if coop_player else "",
+            quest_type=selected_quest.quest_type,
             quest_name=selected_quest.quest_name,
             description=selected_quest.description,
             xp_reward=selected_quest.xp_reward,
             rarity=selected_quest.rarity,
             done=False,
+            advisor="",
         )
+
+        new_quest.save()
 
         return redirect('player_info', player_id=one_player.id)
     
@@ -81,22 +95,21 @@ def sidequest(request):
         user=request.POST.get('player_id')
         one_player = player.objects.get(id=user)
 
-    all_quests = side_quest_databese.objects.all()
-    random_quest_1 = random.choice(all_quests)
-    random_quest_2 = random.choice(all_quests)
-    random_quest_3 = random.choice(all_quests)
+    all_quests_alko = side_quest_databese.objects.filter(quest_type='alko')
+    all_quests_nealko = side_quest_databese.objects.filter(quest_type='nealko')
+    all_quests_coop = side_quest_databese.objects.filter(quest_type='coop')
+    random_quest_alko = random.choice(all_quests_alko)
+    random_quest_nealko = random.choice(all_quests_nealko)
+    random_quest_coop  = random.choice(all_quests_coop)
 
-
-
-
-
-
+    active_players = player.objects.filter(active=True)
 
     return render(request, 'game/side_quest.html', context={
         'player_info': one_player,
-        'random_quest_1': random_quest_1,
-        'random_quest_2': random_quest_2,
-        'random_quest_3': random_quest_3
+        'random_quest_alko': random_quest_alko,
+        'random_quest_nealko': random_quest_nealko,
+        'random_quest_coop': random_quest_coop,
+        'active_players': active_players,
     })
 
 def drink(request, player_id):
@@ -125,6 +138,7 @@ def drink(request, player_id):
 def player_info(request, player_id):
     
     one_player = player.objects.get(id=player_id)
+    one_player_name = one_player.name
 
     dmg_koef_min = round(one_player.dmg_koef * 0.5, 1)
     dmg_koef_max = round(one_player.dmg_koef * 1.5, 1)
@@ -133,7 +147,15 @@ def player_info(request, player_id):
     hp_koef_min = round(one_player.hp_koef * 0.5, 1)
     hp_koef_max = round(one_player.hp_koef * 1.5, 1)
 
-    player_quests = side_quest.objects.filter(player=one_player)
+
+
+    player_quests = side_quest.objects.filter(
+        Q(player=one_player) | Q(player_coop=one_player_name), 
+        done=False
+    )
+
+    print({player_quests})
+ 
 
     return render(request, 'game/player_info.html', {
         'one_player': one_player,
@@ -150,12 +172,23 @@ def player_info(request, player_id):
 
 
 def leaderboard(request):
-    all_players = player.objects.all()
+    all_players = player.objects.all().filter(active=True)
     all_players = all_players.order_by('score').reverse()
+
+    all_achivements = achievements.objects.all()
+    total_dmg = all_achivements.order_by('total_dmg_delt').reverse()
+    best_dmg = all_achivements.order_by('best_dmg_delt').reverse()
+    best_defence = all_achivements.order_by('total_dmg_taken').reverse()
+    total_deaths = all_achivements.order_by('death_counter').reverse()
 
 
     return render(request, 'game/leaderboard.html', {
-        'all_players': all_players})
+        'all_players': all_players,
+        'total_dmg': total_dmg,
+        'best_dmg': best_dmg,
+        'best_defence': best_defence,
+        'total_deaths': total_deaths,
+        })
 
 def index(request):
     return render(request, 'game/index.html')

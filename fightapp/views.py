@@ -125,6 +125,12 @@ def fight(request):
             target_player.save() # Uložení nového HP hráče
             total_boss_dmg += dmg_delt # Sčítáme celkové poškození
             
+            if target_player.hp_actual_fight <= 0:
+                print(Fore.RED + f"Hráč {target_player.name} byl poražen!" + Style.RESET_ALL)
+                player_achievement = achievements.objects.get(player=target_player)
+                player_achievement.death_counter += 1
+                player_achievement.save()
+
             # ZÁZNAM TAHU BOSSE
             TurnLog.objects.create(
                 fight=fight_log,
