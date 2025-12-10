@@ -4,9 +4,11 @@ from . import settings
 from django.conf.urls.static import static
 
 
+
 urlpatterns = [
     path('', include('game.urls',)),
-    path('admin/', admin.site.urls),
+    path('admin22/', admin.site.urls),
+    path('admin/', include('game.urls')),
     path('tutorialapp/', include('tutorialapp.urls')),
     path('fightapp/', include('fightapp.urls')),
 

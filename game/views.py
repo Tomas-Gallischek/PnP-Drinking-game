@@ -4,9 +4,11 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
 from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu
+from django.http import HttpResponse
 import random
 from fightapp.views import fight
-
+import datetime
+from django.utils import timezone
 
 def quest_done(request):
     if request.method == 'POST':
@@ -82,9 +84,20 @@ def take_quest(request):
             rarity=selected_quest.rarity,
             done=False,
             advisor="",
-        )
+        )       
 
         new_quest.save()
+
+        one_player.energie -= 20
+        one_player.save()
+        player.energy_change(one_player)
+        print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {one_player.name}: {one_player.energie}")
+
+        if coop_player:
+            coop_player.energie -= 20
+            coop_player.save()
+            coop_player.energy_change()
+            print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {coop_player.name}: {coop_player.energie}" if coop_player else "Žádný coop hráč.")
 
         return redirect('player_info', player_id=one_player.id)
     
@@ -148,6 +161,10 @@ def player_info(request, player_id):
     hp_koef_max = round(one_player.hp_koef * 1.5, 1)
 
 
+    one_player.energy_change()
+    energy = one_player.energie
+
+
 
     player_quests = side_quest.objects.filter(
         Q(player=one_player) | Q(player_coop=one_player_name), 
@@ -166,6 +183,7 @@ def player_info(request, player_id):
         'armor_koef_max': armor_koef_max,
         'hp_koef_min': hp_koef_min,
         'hp_koef_max': hp_koef_max,
+        'energy': energy,
         
         })
 
@@ -337,3 +355,5 @@ def test(request):
             'draw': draw,
         })
 
+def admin(request):
+    return render(request, 'game/admin.html')

@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 import random
 from colorama import init, Fore, Style
+from django.utils import timezone
+
 
 class pocet_hracu(models.Model):
     pocet_hracu_now = models.IntegerField(default=1)
@@ -39,7 +41,9 @@ class player(models.Model):
     xp = models.IntegerField(default=0, blank=True)
     xp_need = models.IntegerField(default=50, blank=True)
     score = models.IntegerField(default=0, blank=True)
-    energie = models.IntegerField(default=100, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)])
+
+    energie = models.IntegerField(default=200, blank=True, validators=[MinValueValidator(0), MaxValueValidator(200)])
+    last_energy_update = models.DateTimeField(default=timezone.now)
 
     panak = models.IntegerField(default=0, blank=True)
     maly_kelimek = models.IntegerField(default=0, blank=True)
@@ -60,6 +64,22 @@ class player(models.Model):
     hp_koef = models.FloatField(blank=True, default=1)
     hp_now = models.FloatField(blank=True, default=1)
     hp_actual_fight = models.IntegerField(blank=True, default=1)
+
+
+    def energy_change(self):
+        if self.energie <= 200:
+            time_now = timezone.now()
+            time_diff = time_now - self.last_energy_update
+            minutes_passed = round(time_diff.total_seconds() // 60)
+            energy_to_add = int(round(minutes_passed * 5))
+            if self.energie + energy_to_add >= 200:
+                self.energie = 200
+            elif self.energie + energy_to_add <= 0:
+                self.energie = 0
+            else:
+                self.energie += energy_to_add
+            self.last_energy_update = time_now
+            self.save()
 
 
     # Uvnitř class player(models.Model):
