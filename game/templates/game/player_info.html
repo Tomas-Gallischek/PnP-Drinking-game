@@ -9,6 +9,8 @@
 <div class="container">
         <h1><u>Hráč:</u> <b>{{ one_player.name }}</b></h1>
 
+        <img src="{{ one_player.profile_img.url }}" alt="">
+
         <h2><u>Level:</u> <b>{{ one_player.lvl }}</b></h2>
 
         <h2><u>XP:</u> <b>{{ one_player.xp }} / {{ one_player.xp_need }}</b></h2>

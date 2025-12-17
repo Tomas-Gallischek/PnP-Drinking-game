@@ -73,6 +73,9 @@ class pocet_hracu(models.Model):
         return str(self.pocet_hracu_now)
 
 class player(models.Model):
+    profile_img = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+    role_img_id = models.IntegerField(blank=True, null=True) # 1 = mág, 2 = hunter, 3 = warrior
+    
     active = models.BooleanField(default=False)
     name = models.CharField(max_length=100, blank=True)
     lvl = models.IntegerField(default=1, blank=True)
