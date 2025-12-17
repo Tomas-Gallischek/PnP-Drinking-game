@@ -8,12 +8,17 @@
 {% block content %}
 <div class="container">
     <div class="player-header">
-        <h1><u>Hráč:</u> <b>{{ one_player.name }}</b></h1>
+        <h1><u></u> <b>{{ one_player.name }}</b></h1>
         
         <div class="player-main-section">
             <div class="player-avatar-wrapper">
                 <div class="player-avatar-container">
-                    <img src="{{ one_player.profile_img.url }}" alt="{{ one_player.name }}" class="player-avatar">
+                    {% if one_player.profile_img %}
+                    <img src="{{ one_player.profile_img.url }}" alt="Player Avatar" class="player-avatar">
+                    {% else %}
+                    <img src="/media/profile_images/default_avatar.png" alt="Default Avatar" class="player-avatar">
+                    {% endif %}
+                    
                 </div>
                 <div class="player-lvl-badge">Level: {{ one_player.lvl }}</div>
             </div>
@@ -22,21 +27,21 @@
                 <h3><b>{{ one_player.povolani }}</b></h3>
                 
                 <div class="progress-container">
-                    <label>Zkušenosti (XP): {{ one_player.xp }} / {{ one_player.xp_need }}</label>
+                    <label><img src="/media/icons/xp.png" alt="xp" width="30" height="30">: {{ one_player.xp }} / {{ one_player.xp_need }}</label>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill xp-color" style="width: calc(({{ one_player.xp }} / {{ one_player.xp_need }}) * 100%)"></div>
                     </div>
                 </div>
 
                 <div class="progress-container">
-                    <label><img src="media/icons/lighting.png" alt="">: {{ energy }} / 200</label>
+                    <label><img src="/media/icons/lighting.png" alt="energy" width="24" height="24">: {{ energy }} / 200</label>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill energy-color" style="width: calc(({{ energy }} / 200) * 100%)"></div>
                     </div>
                 </div>
 
                 <div class="skill-points-highlight">
-                    Dostupné skill pointy: <b>{{ one_player.skill_points }}</b>
+                    Dostupné skill pointy: <b>{{ one_player.skill_points }} <img src="/media/icons/skill_point.png" alt="skill_point" width="25" height="25" center:"center"></b>
                 </div>
             </div>
         </div>
@@ -44,7 +49,9 @@
         <div class="stats-grid">
             <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card">
                 {% csrf_token %}
-                <span class="stat-label">Útok: <b>{{ one_player.dmg_now }}</b></span>
+
+                <span class="stat-label"><img src="/media/icons/swords.png" alt="attack" width="30" height="30">: <b>{{ one_player.dmg_now }}</b></span>
+
                 <button type="submit" name="stat_type" value="dmg" class="stat-button">
                     <span class="plus-icon">+</span> ({{ dmg_koef_min }}-{{ dmg_koef_max }})
                 </button>
@@ -52,7 +59,9 @@
 
             <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card">
                 {% csrf_token %}
-                <span class="stat-label">Obrana: <b>{{ one_player.armor_now }}</b></span>
+
+                <span class="stat-label"><img src="/media/icons/armor.png" alt="armor" width="40" height="40">: <b>{{ one_player.armor_now }}</b></span>
+
                 <button type="submit" name="stat_type" value="armor" class="stat-button">
                     <span class="plus-icon">+</span> ({{ armor_koef_min }}-{{ armor_koef_max }})
                 </button>
@@ -60,7 +69,9 @@
 
             <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card">
                 {% csrf_token %}
-                <span class="stat-label">Životy: <b>{{ one_player.hp_now }}</b></span>
+
+                <span class="stat-label"><img src="/media/icons/life-bar.png" alt="hp" width="30" height="30">: <b>{{ one_player.hp_now }}</b></span>
+
                 <button type="submit" name="stat_type" value="hp" class="stat-button">
                     <span class="plus-icon">+</span> ({{ hp_koef_min }}-{{ hp_koef_max }})
                 </button>

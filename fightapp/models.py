@@ -5,6 +5,8 @@ class boss_names_descriptions(models.Model):
     patro = models.IntegerField(default=1)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    boss_img = models.ImageField(upload_to='boss_images/', blank=True, null=True)
+    
     def __str__(self):
         return f"{self.patro} {self.name}"
 

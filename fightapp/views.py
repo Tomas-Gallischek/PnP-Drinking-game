@@ -227,12 +227,16 @@ def fight(request):
 
 def dungeon(request):
 
-    all_boss = boss.objects.all()
+    all_boss = boss.objects.all()   
     actual_boss = all_boss.filter(defeated=False).first()
+    actual_boss_img = boss_names_descriptions.objects.get(patro=actual_boss.patro).boss_img
+
+
     print("Aktuální soupeř:", actual_boss)
 
 
     return render(request, 'fightapp/dungeon.html', context={
+        "actual_boss_img": actual_boss_img,
         "actual_boss": actual_boss,
         "all_boss": all_boss
     })
