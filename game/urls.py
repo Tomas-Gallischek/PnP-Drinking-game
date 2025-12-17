@@ -13,4 +13,5 @@ urlpatterns = [
     path('quest_done', views.quest_done, name='quest_done'),
     path('reset', views.reset, name='reset'),
     path('test', views.test, name='test'),
+    path('stat_up/<int:player_id>/', views.stat_up, name='stat_up')
 ]

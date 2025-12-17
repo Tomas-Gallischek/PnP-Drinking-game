@@ -1,4 +1,7 @@
 from hmac import new
+from math import e
+from multiprocessing import context
+from os import error
 import re
 from django.shortcuts import render, redirect
 from django.db.models import Q
@@ -9,6 +12,34 @@ import random
 from fightapp.views import fight
 import datetime
 from django.utils import timezone
+
+
+def stat_up(request, player_id):
+    if request.method == 'POST':
+        one_player = player.objects.get(id=player_id)
+        stat_type = request.POST.get('stat_type')
+        if one_player.skill_points <= 0:
+            return redirect('player_info', player_id=player_id)
+        else:
+            if stat_type == 'dmg':
+                random_dmg = random.uniform(0.8, 1.2)
+                one_player.dmg_now += round(one_player.dmg_koef * random_dmg)
+                one_player.skill_points -= 1
+                one_player.save()
+            elif stat_type == 'armor':
+                random_armor = random.uniform(0.8, 1.2)
+                one_player.armor_now += round(one_player.armor_koef * random_armor)
+                one_player.skill_points -= 1
+                one_player.save()
+
+            elif stat_type == 'hp':
+                random_hp = random.uniform(0.8, 1.2)
+                one_player.hp_now += round(one_player.hp_koef * random_hp)
+                one_player.hp_actual_fight += round(one_player.hp_koef * random_hp)
+                one_player.skill_points -= 1
+                one_player.save()
+
+            return redirect('player_info', player_id=player_id)
 
 def quest_done(request):
     if request.method == 'POST':
@@ -153,12 +184,12 @@ def player_info(request, player_id):
     one_player = player.objects.get(id=player_id)
     one_player_name = one_player.name
 
-    dmg_koef_min = round(one_player.dmg_koef * 0.5, 1)
-    dmg_koef_max = round(one_player.dmg_koef * 1.5, 1)
-    armor_koef_min = round(one_player.armor_koef * 0.5, 1)
-    armor_koef_max = round(one_player.armor_koef * 1.5, 1)
-    hp_koef_min = round(one_player.hp_koef * 0.5, 1)
-    hp_koef_max = round(one_player.hp_koef * 1.5, 1)
+    dmg_koef_min = round(one_player.dmg_koef * 0.8, 1)
+    dmg_koef_max = round(one_player.dmg_koef * 1.2, 1)
+    armor_koef_min = round(one_player.armor_koef * 0.8, 1)
+    armor_koef_max = round(one_player.armor_koef * 1.2, 1)
+    hp_koef_min = round(one_player.hp_koef * 0.8, 1)
+    hp_koef_max = round(one_player.hp_koef * 1.2, 1)
 
 
     one_player.energy_change()

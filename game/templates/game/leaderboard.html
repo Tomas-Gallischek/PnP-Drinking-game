@@ -30,7 +30,7 @@
                     {% for p in total_score %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td class="player-name">{{ p.name }}</td>
+                        <td class="player-name"> <a href="{% url 'player_info' p.id %}">{{ p.name }}</a></td>
                         <td class="value-highlight">{{ p.score }}</td>
                     </tr>
                     {% endfor %}

@@ -17,9 +17,26 @@
 
         <h3><b>{{ one_player.povolani }}</b></h3>
 
-        <h4><u>Útok:</u> <b>{{ one_player.dmg_now }}</b> ({{ dmg_koef_min }} - {{ dmg_koef_max }} / lvl) </h4>
-        <h4><u>Obrana:</u> <b>{{ one_player.armor_now }}</b> ({{ armor_koef_min }} - {{ armor_koef_max }} / lvl) </h4>
-        <h4><u>Životy:</u> <b>{{ one_player.hp_now }}</b> ({{ hp_koef_min }} - {{ hp_koef_max }} / lvl) </h4>
+
+
+        <form action="{% url "stat_up" one_player.id %}" method="post">
+            {% csrf_token %}
+
+            </h2><u>Dostupné skill pointy:</u> <b>{{ one_player.skill_points }}</b><h2/>
+
+
+            <h4><u>Útok:</u> <b>{{ one_player.dmg_now }}</b>  </h4>
+            <button type="submit" name="stat_type" value="dmg" class="button">Útok + ({{ dmg_koef_min }} - {{ dmg_koef_max }})</button>
+
+            <h4><u>Obrana:</u> <b>{{ one_player.armor_now }}</b></h4>
+            <button type="submit" name="stat_type" value="armor" class="button">Obrana + ({{ armor_koef_min }} - {{ armor_koef_max }})</button>
+
+            <h4><u>Životy:</u> <b>{{ one_player.hp_now }}</b> </h4>
+            <button type="submit" name="stat_type" value="hp" class="button">Životy + ({{ hp_koef_min }} - {{ hp_koef_max }})</button>
+        </form>
+
+        
+        
 
 
     <h1>Vypít:</h1>

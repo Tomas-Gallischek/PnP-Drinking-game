@@ -87,6 +87,7 @@ class player(models.Model):
 
     energie = models.IntegerField(default=200, blank=True, validators=[MinValueValidator(0), MaxValueValidator(200)])
     last_energy_update = models.DateTimeField(default=timezone.now)
+    skill_points = models.IntegerField(default=0, blank=True)
 
     panak = models.IntegerField(default=0, blank=True)
     maly_kelimek = models.IntegerField(default=0, blank=True)
@@ -128,6 +129,7 @@ class player(models.Model):
     # Uvnitř class player(models.Model):
     def add_xp(self, amount):
         self.xp += amount
+        self.save()
         self.lvl_up() 
 
 
@@ -139,19 +141,14 @@ class player(models.Model):
             self.xp = xp
             self.lvl += 1
             self.xp_need = int(round((xp_need + 50)))
-            self.save()
+
             print(Fore.LIGHTCYAN_EX + f"{self.name} level up to {self.lvl}!" + Style.RESET_ALL)
 
-            # Díky tomuto bude definitivní koeficient náhodný při každém levelupu  (rozmezí 50%)
-            random_dmg = random.uniform(0.5, 1.5)
-            random_armor = random.uniform(0.5, 1.5)
-            random_hp = random.uniform(0.5, 1.5)
-
-            self.dmg_now += round(self.dmg + ((self.dmg_koef * random_dmg) * self.lvl))
-            self.armor_now += round(self.armor + ((self.armor_koef * random_armor) * self.lvl))
-            self.hp_now += round(self.hp + ((self.hp_koef * random_hp) * self.lvl))
-            self.hp_actual_fight = self.hp_now
+            self.skill_points += 3
             self.save()
+            
+            self.lvl_up()  # Rekurzivní volání pro případ, že hráč získal více úrovní najednou
+
 
     def score_counter(self):
         stats = achievements.objects.get(player=self)
