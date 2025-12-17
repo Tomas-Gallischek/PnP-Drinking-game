@@ -1,3 +1,4 @@
+from turtle import position
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 import random
@@ -14,22 +15,59 @@ class pocet_hracu(models.Model):
     all_players_armor = models.IntegerField(default=1, blank=True)
     all_player_hp = models.IntegerField(default=1, blank=True)
 
+    all_dmg_delt = models.IntegerField(default=0, blank=True)
+    all_dmg_taken = models.IntegerField(default=0, blank=True)
+    all_death_counter = models.IntegerField(default=0, blank=True)
+    all_best_dmg = models.IntegerField(default=0, blank=True)
+
+    all_score_dmg_delt = models.IntegerField(default=0, blank=True)
+    all_score_dmg_taken = models.IntegerField(default=0, blank=True)
+    all_score_death_counter = models.IntegerField(default=0, blank=True)
+    all_score_best_dmg = models.IntegerField(default=0, blank=True)
+    all_score = models.IntegerField(default=0, blank=True)
+
 
     def all_stats_counter(self):
         all_players = player.objects.all()
         all_dmg = 0
         all_armor = 0
         all_hp = 0
+
         for one in all_players:
+
             all_dmg += one.dmg_now 
             all_armor += one.armor_now
             all_hp += one.hp_now
         self.all_players_dmg = all_dmg
         self.all_players_armor = all_armor
-        self.all_players_hp = all_hp
+        self.all_player_hp = all_hp
+
+        self.all_dmg_delt = 0
+        self.all_dmg_taken = 0
+        self.all_death_counter = 0
+        self.all_best_dmg = 0
+        self.all_score_dmg_delt = 0
+        self.all_score_dmg_taken = 0
+        self.all_score_death_counter = 0
+        self.all_score_best_dmg = 0
+        self.all_score = 0
+
+        for one in all_players:
+            stats = achievements.objects.get(player=one)
+            self.all_dmg_delt += stats.total_dmg_delt    
+            self.all_dmg_taken += stats.total_dmg_taken
+            self.all_death_counter += stats.death_counter
+            self.all_best_dmg += stats.best_dmg_delt #Abych následně mohl pracovat s procenty
+            self.all_score_dmg_delt += one.score_dmg_delt
+            self.all_score_dmg_taken += one.score_dmg_taken
+            self.all_score_death_counter += one.score_death_counter
+            self.all_score_best_dmg += one.score_best_dmg
+            self.all_score += one.score
+
+            self.save()
+
         self.save()
-    
-    # ZAPLATIT SI COPILOTA
+
 
     def __str__(self):
         return str(self.pocet_hracu_now)
@@ -40,6 +78,11 @@ class player(models.Model):
     lvl = models.IntegerField(default=1, blank=True)
     xp = models.IntegerField(default=0, blank=True)
     xp_need = models.IntegerField(default=50, blank=True)
+    
+    score_dmg_delt = models.IntegerField(default=0, blank=True)
+    score_dmg_taken = models.IntegerField(default=0, blank=True)
+    score_death_counter = models.IntegerField(default=0, blank=True)
+    score_best_dmg = models.IntegerField(default=0, blank=True)
     score = models.IntegerField(default=0, blank=True)
 
     energie = models.IntegerField(default=200, blank=True, validators=[MinValueValidator(0), MaxValueValidator(200)])
@@ -112,7 +155,30 @@ class player(models.Model):
 
     def score_counter(self):
         stats = achievements.objects.get(player=self)
-        self.score = stats.total_dmg_delt + stats.total_dmg_taken
+        pocet_hracu_instance = pocet_hracu.objects.first()
+
+        all_delt = pocet_hracu_instance.all_dmg_delt
+        all_taken = pocet_hracu_instance.all_dmg_taken
+        all_deaths = pocet_hracu_instance.all_death_counter
+        all_best = pocet_hracu_instance.all_best_dmg
+
+        all_dmg_delt_1_percent = (all_delt / 100)
+        all_dmg_taken_1_percent = (all_taken / 100)
+        all_death_counter_1_percent = (all_deaths / 100)
+        all_best_dmg_1_percent = (all_best / 100)
+       
+
+    # Protože výsledek je kolik procent celkové dmg hráč má. 100% pak odpovídá hodnotě skóre 1000. NNa základě toho by pak hráč třeba s 20% měl skóre 200
+        score_dmg_delt = round((stats.total_dmg_delt / all_dmg_delt_1_percent) * 10) 
+        score_dmg_taken = round((stats.total_dmg_taken / all_dmg_taken_1_percent) * 10) 
+        score_death_counter = round(1000 / ((stats.death_counter / all_death_counter_1_percent)))
+        score_best_dmg = round((stats.best_dmg_delt / all_best_dmg_1_percent) * 10)
+
+        self.score = score_dmg_delt + score_dmg_taken + score_best_dmg + score_death_counter
+        self.score_dmg_delt = score_dmg_delt
+        self.score_dmg_taken = score_dmg_taken
+        self.score_death_counter = score_death_counter
+        self.score_best_dmg = score_best_dmg
         self.save()
 
 

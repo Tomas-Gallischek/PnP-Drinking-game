@@ -3,7 +3,7 @@ import re
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
-from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu
+from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu, pocet_hracu
 from django.http import HttpResponse
 import random
 from fightapp.views import fight
@@ -191,21 +191,22 @@ def player_info(request, player_id):
 
 def leaderboard(request):
     all_players = player.objects.all().filter(active=True)
-    all_players = all_players.order_by('score').reverse()
 
-    all_achivements = achievements.objects.all()
-    total_dmg = all_achivements.order_by('total_dmg_delt').reverse()
-    best_dmg = all_achivements.order_by('best_dmg_delt').reverse()
-    best_defence = all_achivements.order_by('total_dmg_taken').reverse()
-    total_deaths = all_achivements.order_by('death_counter').reverse()
+    total_score = all_players.order_by('score').reverse()
+    score_dmg_delt = all_players.order_by('score_dmg_delt').reverse()
+    score_dmg_taken = all_players.order_by('score_dmg_taken').reverse()
+    score_death_counter = all_players.order_by('score_death_counter').reverse()
+    score_best_dmg = all_players.order_by('score_best_dmg').reverse()
+
 
 
     return render(request, 'game/leaderboard.html', {
         'all_players': all_players,
-        'total_dmg': total_dmg,
-        'best_dmg': best_dmg,
-        'best_defence': best_defence,
-        'total_deaths': total_deaths,
+        'total_score': total_score,
+        'score_dmg_delt': score_dmg_delt,
+        'score_dmg_taken': score_dmg_taken,
+        'score_death_counter': score_death_counter,
+        'score_best_dmg': score_best_dmg,
         })
 
 def index(request):
@@ -217,34 +218,34 @@ def reset(request):
 
     if request.method == 'POST':
         player.objects.all().delete()
-        random_pocet_hracu = random.randint(3, 10)
+        random_pocet_hracu = random.randint(6, 12)
         for i in range(random_pocet_hracu):
             moznosti_povolani = ['mag', 'valecnik', 'hunter']
             povolani = random.choice(moznosti_povolani)
             if povolani == 'mag':
                 dmg = 18
                 # dmg_koef = 9 (původní hodnota)
-                dmg_koef = 18
+                dmg_koef = 20
                 obrana = 2
-                obrana_koef = 0.5
+                obrana_koef = 1.5
                 hp = 70
-                hp_koef = 18
+                hp_koef = 30
             elif povolani == 'valecnik': 
                 dmg = 12
                 # dmg_koef = 4
-                dmg_koef = 6
+                dmg_koef = 5
                 obrana = 10
-                obrana_koef = 2.2
+                obrana_koef = 3
                 hp = 120
-                hp_koef = 35
+                hp_koef = 50
             elif povolani == 'hunter':
                 dmg = 14
                 # dmg_koef = 6
-                dmg_koef = 12
+                dmg_koef = 10
                 obrana = 6
-                obrana_koef = 1.5
+                obrana_koef = 2.5
                 hp = 90
-                hp_koef = 24
+                hp_koef = 40
             else:
                 povolani = 'obycejny clovek'
                 dmg = 1
@@ -256,7 +257,7 @@ def reset(request):
 
             new_player = player.objects.create(
                 active = True,
-                name=random.choice(jmena_hracu.objects.values_list('name', flat=True)),
+                name=random.choice(jmena_hracu.objects.values_list('name', flat=True)) + f" - {povolani}",
                 xp=0,
                 lvl=1,
                 score=0,
@@ -284,6 +285,14 @@ def reset(request):
                     player=p,
                 )
 
+            pocet = player.objects.count()
+            pocet_hracu_instance = pocet_hracu.objects.first()
+            pocet_hracu_instance.pocet_hracu_now = pocet
+            pocet_hracu_instance.pocet_hracu_full = pocet
+            pocet_hracu_instance.pocet_hracu_off = 0
+            pocet_hracu_instance.save()
+
+            
             boss.objects.all().delete()
             first_boss_name = boss_names_descriptions.objects.get(patro=1).name
             boss.objects.create(
@@ -344,6 +353,16 @@ def test(request):
         all_achivements = achievements.objects.all()
         all_achivements = all_achivements.order_by('total_dmg_delt').reverse()
         all_bosses = boss.objects.all()
+
+        total_dmg_all = 0
+        total_armor_all = 0
+
+        for p in all_achivements:
+            total_dmg_all += p.total_dmg_delt
+            total_armor_all += p.total_dmg_taken
+
+        pomer = p.total_dmg_delt / p.total_dmg_taken
+
         
         return render(request, 'game/test_stats.html', context={
             'all_players': all_players,
@@ -353,6 +372,9 @@ def test(request):
             'wins': wins,
             'lose': lose,
             'draw': draw,
+            'total_dmg_all': total_dmg_all,
+            'total_armor_all': total_armor_all,
+            'pomer': pomer,
         })
 
 def admin(request):

@@ -151,7 +151,7 @@ def fight(request):
 
             # POZOR! DO UDRŽENÉHO POŠKOZENÍ SE NEPOČÍTÁ ARMOR, PROTOŽE TANKOVÉ BY JINAK PARADOXNĚ MĚLI NEJMENŠÍ HODNOTY
             
-            player_achievement.total_dmg_taken += boss_dmg_roll
+            player_achievement.total_dmg_taken += target_player_armor_roll
             player_achievement.save()
 
         # Inkrementace čítače tahu a nové iniciativy
@@ -178,6 +178,9 @@ def fight(request):
     # ---------------------------------------------
 
     # VĚCI PO BOJI:
+    hraci = pocet_hracu.objects.first()
+    hraci.all_stats_counter()
+
     for p in players:
         p.hp_actual_fight = p.hp_now
         p.score_counter()
@@ -193,7 +196,12 @@ def fight(request):
         next_reward = actual_boss.reward_xp * 1.1
         hraci = pocet_hracu.objects.first()
         pocet_hracu_now = hraci.pocet_hracu_now
-        hraci.all_stats_counter()
+        print("Počet hráčů nyní:", pocet_hracu_now)
+        
+
+        for p in players:
+            p.add_xp(actual_boss.reward_xp)
+            p.save()
 
         boss.objects.create(
             name = boss_names,
@@ -201,16 +209,14 @@ def fight(request):
             description = "Lorem Ipsum",
             defeated = False,
             lvl = next_lvl,
-            dmg = ((hraci.all_players_dmg) / pocet_hracu_now)* 0.8,
-            armor = ((hraci.all_players_armor) / pocet_hracu_now) * 0.6,
-            hp = ((hraci.all_players_hp) / pocet_hracu_now)* 0.6,
+            dmg = ((hraci.all_players_dmg) / pocet_hracu_now)* 1.1,
+            armor = ((hraci.all_players_armor) / pocet_hracu_now) * 0.5,
+            hp = ((hraci.all_player_hp) / pocet_hracu_now)* 1.2,
             reward_xp = round(next_reward)
         )
         print(f"Nový boss: {boss_names} Patro: {next_patro} Level: {next_lvl} Reward XP: {next_reward}"),
     
-        for p in players:
-            p.add_xp(actual_boss.reward_xp)
-            p.save()
+
 
     return render(request, 'fightapp/fight.html', context={
         # Zde můžete přidat fight_log.id nebo fight_log pro zobrazení výsledků v šabloně
