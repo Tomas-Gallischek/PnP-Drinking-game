@@ -1,0 +1,121 @@
+/* Kontejner celého žebříčku */
+.leaderboard-wrapper {
+    max-width: 1000px;
+    margin: 40px auto;
+    background-color: #1a1a1a; /* Tmavé pozadí */
+    color: #e0e0e0;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.leaderboard-title {
+    text-align: center;
+    color: #ffcc00; /* Zlatá pro název */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+
+/* Styl pro záložky (tlačítka) */
+.leaderboard-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 0;
+    border-bottom: 2px solid #333;
+}
+
+.tab-btn {
+    padding: 12px 20px;
+    background: #2a2a2a;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.tab-btn:hover {
+    background: #3a3a3a;
+    color: #fff;
+}
+
+.tab-btn.active {
+    background: #444;
+    color: #ffcc00;
+    border: 1px solid #333;
+    border-bottom: 2px solid #ffcc00;
+}
+
+/* Skrývání/Zobrazování panelů */
+.leaderboard-pane {
+    display: none;
+    padding-top: 20px;
+}
+
+.leaderboard-pane.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+/* Styl samotné tabulky */
+.pnp-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #222;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.pnp-table thead {
+    background-color: #333;
+    color: #ffcc00;
+}
+
+.pnp-table th, .pnp-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+.pnp-table th {
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+/* Barevné rozlišení řádků */
+.pnp-table tbody tr:nth-child(even) {
+    background-color: #282828;
+}
+
+.pnp-table tbody tr:hover {
+    background-color: #333;
+    transition: background 0.2s;
+}
+
+/* Speciální buňky */
+.player-name {
+    font-weight: bold;
+    color: #fff;
+}
+
+.value-highlight {
+    color: #ffcc00;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.value-add {
+    color: #4caf50; /* Zelená pro body navíc */
+    font-style: italic;
+}
+
+/* Animace */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

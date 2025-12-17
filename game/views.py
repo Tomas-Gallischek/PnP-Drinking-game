@@ -191,6 +191,13 @@ def player_info(request, player_id):
 
 def leaderboard(request):
     all_players = player.objects.all().filter(active=True)
+    all_achivements = achievements.objects.all()
+
+    total_dmg_delt = all_achivements.order_by('total_dmg_delt').reverse()
+    total_dmg_taken = all_achivements.order_by('total_dmg_taken').reverse()
+    death_counter = all_achivements.order_by('death_counter')
+    best_dmg = all_achivements.order_by('best_dmg_delt').reverse()
+
 
     total_score = all_players.order_by('score').reverse()
     score_dmg_delt = all_players.order_by('score_dmg_delt').reverse()
@@ -207,6 +214,10 @@ def leaderboard(request):
         'score_dmg_taken': score_dmg_taken,
         'score_death_counter': score_death_counter,
         'score_best_dmg': score_best_dmg,
+        'total_dmg_delt': total_dmg_delt,
+        'total_dmg_taken': total_dmg_taken,
+        'death_counter': death_counter,
+        'best_dmg': best_dmg,
         })
 
 def index(request):
@@ -225,27 +236,27 @@ def reset(request):
             if povolani == 'mag':
                 dmg = 18
                 # dmg_koef = 9 (původní hodnota)
-                dmg_koef = 20
+                dmg_koef = 30
                 obrana = 2
                 obrana_koef = 1.5
                 hp = 70
-                hp_koef = 30
+                hp_koef = 50
             elif povolani == 'valecnik': 
                 dmg = 12
                 # dmg_koef = 4
-                dmg_koef = 5
+                dmg_koef = 10
                 obrana = 10
                 obrana_koef = 3
                 hp = 120
-                hp_koef = 50
+                hp_koef = 150
             elif povolani == 'hunter':
                 dmg = 14
                 # dmg_koef = 6
-                dmg_koef = 10
+                dmg_koef = 15
                 obrana = 6
                 obrana_koef = 2.5
                 hp = 90
-                hp_koef = 40
+                hp_koef = 100
             else:
                 povolani = 'obycejny clovek'
                 dmg = 1

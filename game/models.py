@@ -162,28 +162,28 @@ class player(models.Model):
         all_deaths = pocet_hracu_instance.all_death_counter
         all_best = pocet_hracu_instance.all_best_dmg
 
-        all_dmg_delt_1_percent = (all_delt / 100)
-        all_dmg_taken_1_percent = (all_taken / 100)
-        all_death_counter_1_percent = (all_deaths / 100)
-        all_best_dmg_1_percent = (all_best / 100)
-       
+        # Pomocná funkce pro bezpečné dělení a výpočet podílu z 1000
+        def get_share(value, total):
+            if total <= 0: return 0
+            return round((value / total) * 1000)
 
-    # Protože výsledek je kolik procent celkové dmg hráč má. 100% pak odpovídá hodnotě skóre 1000. NNa základě toho by pak hráč třeba s 20% měl skóre 200
-        score_dmg_delt = round((stats.total_dmg_delt / all_dmg_delt_1_percent) * 10) 
-        score_dmg_taken = round((stats.total_dmg_taken / all_dmg_taken_1_percent) * 10) 
-        score_death_counter = round(1000 / ((stats.death_counter / all_death_counter_1_percent)))
-        score_best_dmg = round((stats.best_dmg_delt / all_best_dmg_1_percent) * 10)
+        score_dmg_delt = 800 + (get_share(stats.total_dmg_delt, all_delt))
+        score_dmg_taken = 800 + (get_share(stats.total_dmg_taken, all_taken))
+        score_best_dmg = 800 + (get_share(stats.best_dmg_delt, all_best))
+        
+        # SPECIÁLNÍ LOGIKA PRO ÚMRTÍ (Nepřímá úměra)
+        # Spočítáme podíl na úmrtích a odečteme ho od 1000
+        death_share = get_share(stats.death_counter, all_deaths)
+        score_death_counter = 1000 - death_share 
 
+        # Teď už všechno jen sčítáme
         self.score = score_dmg_delt + score_dmg_taken + score_best_dmg + score_death_counter
+        
         self.score_dmg_delt = score_dmg_delt
         self.score_dmg_taken = score_dmg_taken
         self.score_death_counter = score_death_counter
         self.score_best_dmg = score_best_dmg
         self.save()
-
-
-    def __str__(self):
-        return self.name
 
 
 # VEDLEJŠÍ ÚKOLY přímo navázané na hráče

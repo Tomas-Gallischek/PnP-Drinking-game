@@ -209,9 +209,9 @@ def fight(request):
             description = "Lorem Ipsum",
             defeated = False,
             lvl = next_lvl,
-            dmg = ((hraci.all_players_dmg) / pocet_hracu_now)* 1.1,
+            dmg = ((hraci.all_players_dmg) / pocet_hracu_now)* 0.9,
             armor = ((hraci.all_players_armor) / pocet_hracu_now) * 0.5,
-            hp = ((hraci.all_player_hp) / pocet_hracu_now)* 1.2,
+            hp = ((hraci.all_player_hp) / pocet_hracu_now)* 1.3,
             reward_xp = round(next_reward)
         )
         print(f"Nový boss: {boss_names} Patro: {next_patro} Level: {next_lvl} Reward XP: {next_reward}"),

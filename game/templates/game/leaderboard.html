@@ -1,8 +1,141 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Žebříček{% endblock title %}
+{% block title %}Žebříček - Síň slávy{% endblock title %}
+
+{% block styly %}
+    <link rel="stylesheet" href="{% static 'game/leaderboard.css' %}">
+{% endblock styly %}
 
 {% block content %}
+<div class="leaderboard-wrapper">
+    <h1 class="leaderboard-title">Síň slávy</h1>
 
+    <div class="leaderboard-tabs" style="margin-bottom: 20px;">
+        <button class="tab-btn active" onclick="showLeaderboard('total_score')">Celkové skóre</button>
+        <button class="tab-btn" onclick="showLeaderboard('dmg_delt')">Řád BERSERKA</button>
+        <button class="tab-btn" onclick="showLeaderboard('dmg_taken')">Řád KOLOSA</button>
+        <button class="tab-btn" onclick="showLeaderboard('death_counter')">Řád NEKROMANTA</button>
+        <button class="tab-btn" onclick="showLeaderboard('best_dmg')">Řád Asasina</button>
+    </div>
 
+    <div class="leaderboard-content">
+        <div id="total_score" class="leaderboard-pane active">
+            <h2>Celkové skóre</h2>
+            <table class="pnp-table">
+                <thead>
+                    <tr><th>Pořadí</th><th>Hráč</th><th>Skóre</th></tr>
+                </thead>
+                <tbody>
+                    {% for p in total_score %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="player-name">{{ p.name }}</td>
+                        <td class="value-highlight">{{ p.score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="dmg_delt" class="leaderboard-pane">
+            <h2>Udělené celkové poškození:</h2>
+            <table class="pnp-table">
+                <thead>
+                    <tr><th>Pořadí</th><th>Hráč</th><th>Celkový DMG</th><th>Body</th></tr>
+                </thead>
+                <tbody>
+                    {% for a in total_dmg_delt %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="player-name">{{ a.player.name }}</td>
+                        <td>{{ a.total_dmg_delt }}</td>
+                        <td class="value-add">+{{ a.player.score_dmg_delt }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="dmg_taken" class="leaderboard-pane">
+            <h2>Utankované poškození:</h2>
+            <table class="pnp-table">
+                <thead>
+                    <tr><th>Pořadí</th><th>Hráč</th><th>Obdržený DMG</th><th>Body</th></tr>
+                </thead>
+                <tbody>
+                    {% for a in total_dmg_taken %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="player-name">{{ a.player.name }}</td>
+                        <td>{{ a.total_dmg_taken }}</td>
+                        <td class="value-add">+{{ a.player.score_dmg_taken }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="death_counter" class="leaderboard-pane">
+            <h2>Počet úmrtí:</h2>
+            <table class="pnp-table">
+                <thead>
+                    <tr><th>Pořadí</th><th>Hráč</th><th>Počet úmrtí</th><th>Body</th></tr>
+                </thead>
+                <tbody>
+                    {% for a in death_counter %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="player-name">{{ a.player.name }}</td>
+                        <td>{{ a.death_counter }}</td>
+                        <td class="value-add">+{{ a.player.score_death_counter }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="best_dmg" class="leaderboard-pane">
+            <h2>Nejvyšší jednorázové poškození:</h2>
+            <table class="pnp-table">
+                <thead>
+                    <tr><th>Pořadí</th><th>Hráč</th><th>Max. DMG</th><th>Body</th></tr>
+                </thead>
+                <tbody>
+                    {% for a in best_dmg %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="player-name">{{ a.player.name }}</td>
+                        <td>{{ a.best_dmg_delt }}</td>
+                        <td class="value-add">+{{ a.player.score_best_dmg }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showLeaderboard(id) {
+        // Skryje všechny panely
+        const panes = document.querySelectorAll('.leaderboard-pane');
+        panes.forEach(pane => {
+            pane.classList.remove('active');
+            pane.style.display = 'none';
+        });
+
+        // Deaktivuje všechna tlačítka
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // Zobrazí vybraný panel
+        const selectedPane = document.getElementById(id);
+        selectedPane.classList.add('active');
+        selectedPane.style.display = 'block';
+        
+        // Aktivuje kliknuté tlačítko
+        event.currentTarget.classList.add('active');
+    }
+</script>
 {% endblock content %}
