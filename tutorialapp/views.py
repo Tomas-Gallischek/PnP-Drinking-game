@@ -14,7 +14,7 @@ def tut_end(request):
 
         if povolani == 'mag':
             dmg = 18
-            dmg_koef = 30
+            dmg_koef = 25
             obrana = 2
             obrana_koef = 1.5
             hp = 70

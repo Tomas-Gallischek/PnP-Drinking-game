@@ -4,10 +4,11 @@ from multiprocessing import context
 from os import error
 import profile
 import re
+import stat
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
-from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu, pocet_hracu
+from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu, pocet_hracu, side_quest_generated, test_model
 from django.http import HttpResponse
 import random
 from fightapp.views import fight
@@ -104,7 +105,10 @@ def take_quest(request):
         print(f"Quest pro hráče: {user}, coop hráč: {user_coop}")
 
         quest_id = request.POST.get('quest_id')
-        selected_quest = side_quest_databese.objects.get(id=quest_id)
+        selected_quest = side_quest_generated.objects.get(id=quest_id)
+
+        one_player.quest_refresh += 1
+        one_player.save()
 
         new_quest = side_quest.objects.create(
             player=one_player,
@@ -117,7 +121,6 @@ def take_quest(request):
             xp_reward=selected_quest.xp_reward,
             rarity=selected_quest.rarity,
             done=False,
-            advisor="",
         )       
 
         new_quest.save()
@@ -125,6 +128,7 @@ def take_quest(request):
         one_player.energie -= 20
         one_player.save()
         player.energy_change(one_player)
+
         print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {one_player.name}: {one_player.energie}")
 
         if coop_player:
@@ -133,31 +137,117 @@ def take_quest(request):
             coop_player.energy_change()
             print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {coop_player.name}: {coop_player.energie}" if coop_player else "Žádný coop hráč.")
 
+        expirated_quests = side_quest_generated.objects.filter(player=one_player)
+        expirated_quests.delete()
+
         return redirect('player_info', player_id=one_player.id)
     
     return redirect('index')
+
+def quest_generator(request, player_id):
+    one_player = player.objects.get(id=player_id)
+    one_player.quest_refresh -= 1
+    one_player.save()
+    all_quests_alko = side_quest_databese.objects.filter(quest_type='alko')
+    all_quests_nealko = side_quest_databese.objects.filter(quest_type='nealko')
+    all_quests_coop = side_quest_databese.objects.filter(quest_type='coop')
+
+    random_quest_alko = random.choice(all_quests_alko)
+    random_quest_nealko = random.choice(all_quests_nealko)
+    random_quest_coop  = random.choice(all_quests_coop)
+
+    new_generated_quest = [random_quest_alko, random_quest_nealko, random_quest_coop]
+
+    for quest in new_generated_quest:
+        rarity_roll = random.randint(1, one_player.lvl + 10) #+10 kvůli +1. levelu hrače
+        
+        if rarity_roll >= 20:
+            rarity = 'legendary'
+            rarity_kof = 2
+        elif rarity_roll >= 16:
+            rarity = 'epic'
+            rarity_kof = 1.8
+        elif rarity_roll >= 12:
+            rarity = 'rare'
+            rarity_kof = 1.6
+        elif rarity_roll >= 8:
+            rarity = 'uncommon'
+            rarity_kof = 1.4
+        elif rarity_roll >= 4:
+            rarity = 'common'
+            rarity_kof = 1.2
+        else:
+            rarity = 'common'
+            rarity_kof = 1
+
+        xp_reward = (30 + (one_player.lvl * 5)) * rarity_kof
+
+        side_quest_generated.objects.create(
+            player=one_player,
+            quest_name = quest.quest_name,
+            quest_type = quest.quest_type,
+            description = quest.description,
+            xp_reward = xp_reward,
+            rarity = rarity,
+        )
 
 def sidequest(request):
     if request.method == 'POST':
         user=request.POST.get('player_id')
         one_player = player.objects.get(id=user)
 
-    all_quests_alko = side_quest_databese.objects.filter(quest_type='alko')
-    all_quests_nealko = side_quest_databese.objects.filter(quest_type='nealko')
-    all_quests_coop = side_quest_databese.objects.filter(quest_type='coop')
-    random_quest_alko = random.choice(all_quests_alko)
-    random_quest_nealko = random.choice(all_quests_nealko)
-    random_quest_coop  = random.choice(all_quests_coop)
+        player_refresh_points = one_player.quest_refresh
+        print(f"Počet refresh pointů hráče {one_player.name}: {player_refresh_points}")
+        if player_refresh_points >= 1:
+            one_player.save()
+            quest_generator(request, one_player.id)
 
-    active_players = player.objects.filter(active=True)
 
-    return render(request, 'game/side_quest.html', context={
-        'player_info': one_player,
-        'random_quest_alko': random_quest_alko,
-        'random_quest_nealko': random_quest_nealko,
-        'random_quest_coop': random_quest_coop,
-        'active_players': active_players,
-    })
+        active_players = player.objects.filter(active=True)
+
+        ready_random_quest_alko = side_quest_generated.objects.filter(player=one_player, quest_type='alko').last()
+        ready_random_quest_nealko = side_quest_generated.objects.filter(player=one_player, quest_type='nealko').last()
+        ready_random_quest_coop = side_quest_generated.objects.filter(player=one_player, quest_type='coop').last()
+
+
+        return render(request, 'game/side_quest.html', context={
+            'player_info': one_player,
+            'random_quest_alko': ready_random_quest_alko,
+            'random_quest_nealko': ready_random_quest_nealko,
+            'random_quest_coop': ready_random_quest_coop,
+            'active_players': active_players,
+        })
+    
+
+def quest_refresh(request):
+    if request.method == 'POST':
+        user=request.POST.get('player_id')
+        one_player = player.objects.get(id=user)
+
+        if one_player.energie >= 20:
+            one_player.energie -= 20
+            one_player.quest_refresh += 1
+            print("HRÁČI BYLY PŘIČTENY REFRESH POINTY")
+            one_player.save()
+            side_quest_generated.objects.filter(player=one_player).delete()
+            print(f"Hráči bylo odečteno 20 energie za obnovení úkolů. Aktuální energie hráče {one_player.name}: {one_player.energie}")
+            quest_generator(request, one_player.id)
+            print(f"Hráči {one_player.name} byly obnoveny úkoly.")
+
+        active_players = player.objects.filter(active=True)
+
+        ready_random_quest_alko = side_quest_generated.objects.filter(player=one_player, quest_type='alko').last()
+        ready_random_quest_nealko = side_quest_generated.objects.filter(player=one_player, quest_type='nealko').last()
+        ready_random_quest_coop = side_quest_generated.objects.filter(player=one_player, quest_type='coop').last()
+
+        return render(request, 'game/side_quest.html', context={
+            'player_info': one_player,
+            'random_quest_alko': ready_random_quest_alko,
+            'random_quest_nealko': ready_random_quest_nealko,
+            'random_quest_coop': ready_random_quest_coop,
+            'active_players': active_players,
+        })
+
 
 def drink(request, player_id):
     one_player = player.objects.get(id=player_id)
@@ -260,8 +350,11 @@ def index(request):
 
 def reset(request):
     if request.method == 'POST':
+        test_start = test_model.objects.first()
+        test_question = test_start.test_status
+        
 
-        test_question = request.POST.get('test_question')
+        print(f"Test question value: {test_question}")
         player.objects.all().delete()
         achievements.objects.all().delete()
         boss.objects.all().delete()
@@ -276,7 +369,7 @@ def reset(request):
             if povolani == 'mag':
                 dmg = 18
                 # dmg_koef = 9 (původní hodnota)
-                dmg_koef = 30
+                dmg_koef = 25
                 obrana = 2
                 obrana_koef = 1.5
                 hp = 70
@@ -311,7 +404,7 @@ def reset(request):
                 role_id = 4
 
 
-            if test_question == "True":
+            if test_question == True:
                 chose_povolani = povolani
             else:
                 chose_povolani = ""
@@ -384,6 +477,10 @@ def reset(request):
 
 def test(request):
     if request.method == 'POST':
+        test_start = test_model.objects.first()
+        test_start.test_status = True
+        test_start.save()
+
         reset(request)
         print("PROBĚHLO PROMAZÁNÍ DATABÁZE")
         actual_patro = 1
@@ -391,10 +488,16 @@ def test(request):
         wins = 0
         lose = 0
         draw = 0
-
+        actual_boss = boss.objects.filter(defeated=False).first()
         while actual_patro < 25 or actual_boss.name == 'KONEC HRY':
             actual_boss = boss.objects.filter(defeated=False).first()
             actual_patro = actual_boss.patro
+
+            all_players = player.objects.all()
+            for p in all_players:
+                stat_up_test(request, p.id)
+            
+            
             fight(request)
 
             all_players = player.objects.all()
@@ -432,7 +535,9 @@ def test(request):
 
         pomer = p.total_dmg_delt / p.total_dmg_taken
 
-        
+        test_start.test_status = False
+        test_start.save()
+
         return render(request, 'game/test_stats.html', context={
             'all_players': all_players,
             'all_achivements': all_achivements,
@@ -463,3 +568,47 @@ def deactive(request):
         p.active = False
         p.save()
     return redirect('index')
+
+
+def stat_up_test(request, player_id):
+    one_player = player.objects.get(id=player_id)
+    while one_player.skill_points >= 1:
+        print(f"Zvyšování statů pro hráče {one_player.name}, zbývající skill pointy: {one_player.skill_points}, povolání: {one_player.povolani}")
+
+        if one_player.povolani == "mag":
+            stat_type = random.choices(
+                ['dmg', 'armor', 'hp'],
+                weights=[0.6, 0.1, 0.3],
+                k=1
+            )[0]
+        elif one_player.povolani == "valecnik":
+            stat_type = random.choices(
+                ['dmg', 'armor', 'hp'],
+                weights=[0.2, 0.4, 0.4],
+                k=1
+            )[0]
+        elif one_player.povolani == "hunter":
+            stat_type = random.choices(
+                ['dmg', 'armor', 'hp'],
+                weights=[0.4, 0.3, 0.3],
+                k=1
+            )[0]
+
+        if stat_type == 'dmg':
+            random_dmg = random.uniform(0.8, 1.2)
+            one_player.dmg_now += round(one_player.dmg_koef * random_dmg)
+            one_player.skill_points -= 1
+            one_player.save()
+        elif stat_type == 'armor':
+            random_armor = random.uniform(0.8, 1.2)
+            one_player.armor_now += round(one_player.armor_koef * random_armor)
+            one_player.skill_points -= 1
+            one_player.save()
+
+        elif stat_type == 'hp':
+            random_hp = random.uniform(0.8, 1.2)
+            one_player.hp_now += round(one_player.hp_koef * random_hp)
+            one_player.hp_actual_fight += round(one_player.hp_koef * random_hp)
+            one_player.skill_points -= 1
+            one_player.save()
+    

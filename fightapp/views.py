@@ -220,9 +220,9 @@ def fight(request):
             defeated = False,
             lvl = next_lvl,
 
-            dmg = ((hraci.all_players_dmg) / pocet_hracu_now) + (actual_boss.dmg),
-            armor = ((hraci.all_players_armor) / pocet_hracu_now) + (actual_boss.armor),
-            hp = ((hraci.all_player_hp) / pocet_hracu_now) + (actual_boss.hp),
+            dmg = (((hraci.all_players_dmg) / pocet_hracu_now) / 7) + (actual_boss.dmg),
+            armor = (((hraci.all_players_armor) / pocet_hracu_now) / 10) + (actual_boss.armor),
+            hp = (((hraci.all_player_hp) / pocet_hracu_now) / 5) + (actual_boss.hp),
 
             reward_xp = round(next_reward)
         )

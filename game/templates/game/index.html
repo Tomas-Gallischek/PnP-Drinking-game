@@ -4,7 +4,7 @@
 
 <form action="reset" method="post">{% csrf_token %}<button type="submit" name="test_question" value="True" class="button">Reset</button></form>
 
-<form action="test" method="post">{% csrf_token %}<button type="submit" class="button">Test</button></form>
+<form action="test" method="post">{% csrf_token %}<button type="submit" name="test_question" value="True" class="button">Test</button></form>
 
 <form action="{% url "welcome" %}"> {% csrf_token %} <button type="submit" class="button">Spustit tutorial</button></form>
 

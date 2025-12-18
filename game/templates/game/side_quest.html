@@ -15,11 +15,25 @@
         </h3><b>20 energie</b><h3/>
     </div>
 
+
+    <form action="{% url 'quest_refresh' %}" method="post" class="refresh-quests-form">
+        {% csrf_token %}
+        <button type="submit" class="button">Obnovit úkoly (20 energie)</button>
+        <input type="hidden" name="player_id" value="{{ player_info.id }}">
+    </form>
+
+    {% if player_info.energie > 20 %}
+        <p class="energy-info">Aktuální energie: {{ player_info.energie }}</p>
+    {% else %}
+        <p class="energy-info-low">Nemáš dost energie na přijetí nebo obnovení úkolů! Aktuální energie: {{ player_info.energie }}</p>
+    {% endif %}
+
     <div class="quest-card">
         <h1>ALKO Quest:</h1>
         <h4>{{ random_quest_alko.quest_name }}</h4>
         <p class="quest-description">{{ random_quest_alko.description }}</p>
         <p class="quest-reward">Odměna: {{ random_quest_alko.xp_reward }} XP</p>
+        <p class="rarity-{{random_quest_alko.rarity}}"> <strong><b>{{ random_quest_alko.rarity }}</b></strong></p>
 
         <form action="{% url 'take_quest' %}" method="post" class="quest-action-area">
             {% csrf_token %}
@@ -34,6 +48,7 @@
         <h4>{{ random_quest_nealko.quest_name }}</h4>
         <p class="quest-description">{{ random_quest_nealko.description }}</p>
         <p class="quest-reward">Odměna: {{ random_quest_nealko.xp_reward }} XP</p>
+        <p class="rarity-{{random_quest_nealko.rarity}}"> <strong><b>{{ random_quest_nealko.rarity }}</b></strong></p>
 
         <form action="{% url 'take_quest' %}" method="post" class="quest-action-area">
             {% csrf_token %}
@@ -48,6 +63,7 @@
         <h4>{{ random_quest_coop.quest_name }}</h4>
         <p class="quest-description">{{ random_quest_coop.description }}</p>
         <p class="quest-reward">Odměna: {{ random_quest_coop.xp_reward }} XP / hráč</p>
+        <p class="rarity-{{random_quest_coop.rarity}}"> <strong><b>{{ random_quest_coop.rarity }}</b></strong></p>
 
         <form action="{% url 'take_quest' %}" method="post" class="quest-action-area">
             {% csrf_token %}
@@ -67,4 +83,7 @@
         </form>
     </div>
 </div>
+
+
+
 {% endblock content %}

@@ -89,6 +89,7 @@ class player(models.Model):
     score_best_dmg = models.IntegerField(default=0, blank=True)
     score = models.IntegerField(default=0, blank=True)
 
+    quest_refresh = models.IntegerField(default=1)
     energie = models.IntegerField(default=200, blank=True, validators=[MinValueValidator(0), MaxValueValidator(200)])
     last_energy_update = models.DateTimeField(default=timezone.now)
     skill_points = models.IntegerField(default=0, blank=True)
@@ -213,7 +214,6 @@ class side_quest(models.Model):
     xp_reward = models.IntegerField(default=0, blank=True)
     rarity = models.CharField(max_length=50, blank=True, choices=rarity_choices)
     done = models.BooleanField(default=False, blank=True)
-    advisor = models.CharField(max_length=100, blank=True)
 
 
     def __str__(self):
@@ -221,6 +221,20 @@ class side_quest(models.Model):
 
 # MOŽNOSTI ÚKOLŮ
 class side_quest_databese(models.Model):
+
+    quest_type_choices = [
+        ('alko', 'Alko'),
+        ('nealko', 'Nealko'),
+        ('coop', 'Coop')
+    ]
+
+    quest_name = models.CharField(max_length=100, blank=True)
+    quest_type = models.CharField(max_length=100, blank=True, choices=quest_type_choices)
+    description = models.TextField(blank=True)
+
+
+
+class side_quest_generated(models.Model):
 
     rarity_choices = [
         ('common', 'Common'),
@@ -235,13 +249,13 @@ class side_quest_databese(models.Model):
         ('nealko', 'Nealko'),
         ('coop', 'Coop')
     ]
-
+    player = models.ForeignKey(player, on_delete=models.CASCADE, related_name='side_quests_generated', null=True, blank=True)
     quest_name = models.CharField(max_length=100, blank=True)
     quest_type = models.CharField(max_length=100, blank=True, choices=quest_type_choices)
     description = models.TextField(blank=True)
     xp_reward = models.IntegerField(default=0, blank=True)
     rarity = models.CharField(max_length=50, blank=True, choices=rarity_choices)
-
+    
 
     def __str__(self):
         return f"{self.quest_name} ({self.quest_type})"
@@ -266,3 +280,7 @@ class jmena_hracu(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+class test_model(models.Model):
+    test_status = models.BooleanField(default=False)
