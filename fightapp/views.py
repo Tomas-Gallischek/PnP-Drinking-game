@@ -1,4 +1,6 @@
+from math import e
 from operator import ne
+from pickle import FALSE, TRUE
 import random
 from typing import Self
 from django.shortcuts import render
@@ -244,12 +246,31 @@ def dungeon(request):
     actual_boss = all_boss.filter(defeated=False).first()
     actual_boss_img = boss_names_descriptions.objects.get(patro=actual_boss.patro).boss_img
 
+    energy_request = player.objects.filter(active=True)
+    low_energy_players = energy_request.filter(energie__lt=50)
+
+    start_status = False
+
+    for p in energy_request:
+        if p.energie < 50:
+            print("Hráč", p.name, "má nedostatek energie:", p.energie)
+            start_status = False
+            break
+        else:
+            start_status = True
+            print("Hráč", p.name, "má dostatek energie:", p.energie)
+ 
 
     print("Aktuální soupeř:", actual_boss)
+    print("Startovní status:", start_status)
 
 
     return render(request, 'fightapp/dungeon.html', context={
         "actual_boss_img": actual_boss_img,
         "actual_boss": actual_boss,
-        "all_boss": all_boss
+        "all_boss": all_boss,
+        "start_status": start_status,
+        "low_energy_players": low_energy_players
+
+        
     })

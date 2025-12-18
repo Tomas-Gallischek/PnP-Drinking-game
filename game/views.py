@@ -225,7 +225,7 @@ def player_info(request, player_id):
 
 def leaderboard(request):
     all_players = player.objects.all().filter(active=True)
-    all_achivements = achievements.objects.all()
+    all_achivements = achievements.objects.all().filter(player__active=True)
 
     total_dmg_delt = all_achivements.order_by('total_dmg_delt').reverse()
     total_dmg_taken = all_achivements.order_by('total_dmg_taken').reverse()
@@ -261,6 +261,7 @@ def index(request):
 def reset(request):
     if request.method == 'POST':
 
+        test_question = request.POST.get('test_question')
         player.objects.all().delete()
         achievements.objects.all().delete()
         boss.objects.all().delete()
@@ -309,6 +310,12 @@ def reset(request):
                 hp_koef = 1
                 role_id = 4
 
+
+            if test_question == "True":
+                chose_povolani = povolani
+            else:
+                chose_povolani = ""
+
             new_player = player.objects.create(
                 active = True,
                 name=i.name,
@@ -319,9 +326,9 @@ def reset(request):
                 xp=0,
                 lvl=1,
                 score=0,
-                energie=0,
+                energie=100,
                 last_energy_update=timezone.now(),
-                povolani=povolani,
+                povolani=chose_povolani,
                 dmg=dmg,
                 dmg_koef=dmg_koef,
                 dmg_now=dmg,
@@ -441,3 +448,18 @@ def test(request):
 
 def admin(request):
     return render(request, 'game/admin.html')
+
+
+def active(request):
+    all_players = player.objects.all()
+    for p in all_players:
+        p.active = True
+        p.save()
+    return redirect('index')
+
+def deactive(request):
+    all_players = player.objects.all()
+    for p in all_players:
+        p.active = False
+        p.save()
+    return redirect('index')

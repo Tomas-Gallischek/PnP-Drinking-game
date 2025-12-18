@@ -1,26 +1,50 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block styly %}
+<link rel="stylesheet" href="{% static 'tutorialapp/tutorial.css' %}">
+{% endblock styly %}
 
 {% block content %}
 
 <h1>TUTORIAL:</h1>
-
-Hráč: {{ chosen_player.name }}
-
+<h2>Hráč: <strong><u>{{ chosen_player.name }}</u></strong></h2>
 <h2>Vyber si svoje povolání:</h2>
 
 <form action="{% url "tut_end" %}" method="post">
     {% csrf_token %}
     <input type="hidden" name="player_id" value="{{ chosen_player.id }}">
 
-    <button type="submit" name="povolani" value="mag">Kouzelník</button>
+    <div class="character-grid">
+        
+        <div class="char-form" style="--delay: 1;">
+            <button type="submit" name="povolani" class="button avatar-button" value="mag">
+                <div class="player-avatar-container">
+                    <img src="/media/icons/1{{ chosen_player.gender }}.png" alt="Mág" class="player-avatar">
+                </div>
+            </button>
+            <p style="text-align: center; color: gold; font-family: 'Georgia', serif;">Mág</p>
+        </div>
 
-    <p></p>
+        <div class="char-form" style="--delay: 2;">
+            <button type="submit" name="povolani" class="button avatar-button" value="valecnik">
+                <div class="player-avatar-container">
+                    <img src="/media/icons/3{{ chosen_player.gender }}.png" alt="Válečník" class="player-avatar">
+                </div>
+            </button>
+            <p style="text-align: center; color: gold; font-family: 'Georgia', serif;">Válečník</p>
+        </div>
 
-    <button type="submit" name="povolani" value="valecnik">Válečník</button>
+        <div class="char-form" style="--delay: 3;">
+            <button type="submit" name="povolani" class="button avatar-button" value="hunter">
+                <div class="player-avatar-container">
+                    <img src="/media/icons/2{{ chosen_player.gender }}.png" alt="Hunter" class="player-avatar">
+                </div>
+            </button>
+            <p style="text-align: center; color: gold; font-family: 'Georgia', serif;">Lovec</p>
+        </div>
 
-    <p></p>
-
-    <button type="submit" name="povolani" value="hunter">Hunter</button>
+    </div>
 </form>
 
 {% endblock content %}

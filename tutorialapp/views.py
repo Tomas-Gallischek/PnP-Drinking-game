@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from game.models import player, pocet_hracu, achievements
+from game.models import jmena_hracu, player, pocet_hracu, achievements
+from django.utils import timezone
 
 
 # TADY PROBÍHÁ TAKOVÁ REGISTRACE HRÁČE A JEHO VÝBĚR POVOLÁNÍ
@@ -13,28 +14,28 @@ def tut_end(request):
 
         if povolani == 'mag':
             dmg = 18
-            # dmg_koef = 9 (původní hodnota)
-            dmg_koef = 18
+            dmg_koef = 30
             obrana = 2
-            obrana_koef = 0.5
+            obrana_koef = 1.5
             hp = 70
-            hp_koef = 18
+            hp_koef = 50
+            role_id = 1
         elif povolani == 'valecnik': 
             dmg = 12
-            # dmg_koef = 4
-            dmg_koef = 6
+            dmg_koef = 10
             obrana = 10
-            obrana_koef = 2.2
+            obrana_koef = 3
             hp = 120
-            hp_koef = 35
+            hp_koef = 150
+            role_id = 3
         elif povolani == 'hunter':
             dmg = 14
-            # dmg_koef = 6
-            dmg_koef = 12
+            dmg_koef = 15
             obrana = 6
-            obrana_koef = 1.5
+            obrana_koef = 2.5
             hp = 90
-            hp_koef = 24
+            hp_koef = 100
+            role_id = 2
         else:
             povolani = 'obycejny clovek'
             dmg = 1
@@ -43,34 +44,45 @@ def tut_end(request):
             obrana_koef = 1
             hp = 1
             hp_koef = 1
+            role_id = 4
 
-        chosen_player = player.objects.get(id=player_id)
-        # NASTAVENÍ ZÁKLADNÍCH HODNOT
-        chosen_player.dmg = dmg
-        chosen_player.dmg_koef = dmg_koef
-        chosen_player.armor = obrana
-        chosen_player.armor_koef = obrana_koef
-        chosen_player.hp = hp
-        chosen_player.hp_koef = hp_koef
-        chosen_player.povolani = povolani
+        
+        this_player = player.objects.get(id=player_id)
+        chosen_player = jmena_hracu.objects.get(name=this_player.name)
 
-        # NASTAVENÍ HODNOT PRO LVL 1
-        chosen_player.dmg_now = dmg
-        chosen_player.dmg_koef = dmg_koef
-        chosen_player.armor_now = obrana
-        chosen_player.armor_koef = obrana_koef
-        chosen_player.hp_now = hp
-        chosen_player.hp_koef = hp_koef
-        chosen_player.hp_actual_fight = hp
-        chosen_player.povolani = povolani
+        this_player.active = True
+        this_player.name = chosen_player.name
+        this_player.gender = chosen_player.gender
+        this_player.profile_img = chosen_player.player_profile_img
+        this_player.skill_points = 0
+        this_player.role_img_id = role_id
+        this_player.xp = 0
+        this_player.lvl = 1
+        this_player.score = 0
+        this_player.energie = 0
+        this_player.last_energy_update = timezone.now()
+        this_player.povolani = povolani
+        this_player.dmg = dmg
+        this_player.dmg_koef = dmg_koef
+        this_player.dmg_now = dmg
+        this_player.armor = obrana
+        this_player.armor_koef = obrana_koef
+        this_player.armor_now = obrana
+        this_player.hp = hp
+        this_player.hp_koef = hp_koef
+        this_player.hp_now = hp
+        this_player.hp_actual_fight = hp
+        this_player.panak = 0
+        this_player.maly_kelimek = 0
+        this_player.velky_kelimek = 0
 
-        #Aktivace hráče:
-        chosen_player.active = True
-        chosen_player.save()
+        this_player.save()
+
+        print(f"Vytvořen hráč: {this_player.name} s povoláním {this_player.povolani}")
 
         #Založení achievemts pro hráče
         achievements.objects.create(
-            player=chosen_player,
+            player=this_player,
             best_dmg_delt=0,
             total_dmg_delt=0,
             total_dmg_taken=0,
@@ -93,7 +105,7 @@ def tut_end(request):
         pocet_hracu_data.save()
 
     return render(request, 'tutorialapp/end_tutorial.html', context={
-        "chosen_player": chosen_player,
+        "chosen_player": this_player,
         })
 
 def vyber_povolani(request):
@@ -102,6 +114,7 @@ def vyber_povolani(request):
         player_id = request.POST.get('player_id')
         
         chosen_player = player.objects.get(id=player_id)
+        
 
     return render(request, 'tutorialapp/vyber_povolani.html', context={
         "chosen_player": chosen_player
@@ -112,10 +125,11 @@ def vyber_povolani(request):
 def vyber_postavy(request):
 
     all_players = player.objects.all()
+    filtred_players = all_players.filter(povolani="")
 
-# Deaktivace všech hráčů před výběrem nové postavy pokud dělám tutorial
-    for p in all_players:
+    for p in filtred_players:
         p.active = False
+        achievements.objects.filter(player=p).delete()
         p.save()
         
     

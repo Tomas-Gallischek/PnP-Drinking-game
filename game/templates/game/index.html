@@ -2,9 +2,14 @@
 
 {% block content %}
 
-<form action="reset" method="post">{% csrf_token %}<button type="submit" class="button">Reset</button></form>
+<form action="reset" method="post">{% csrf_token %}<button type="submit" name="test_question" value="True" class="button">Reset</button></form>
 
 <form action="test" method="post">{% csrf_token %}<button type="submit" class="button">Test</button></form>
+
+<form action="{% url "welcome" %}"> {% csrf_token %} <button type="submit" class="button">Spustit tutorial</button></form>
+
+<form action="active" method="post">{% csrf_token %}<button type="submit" class="button">Aktivovat všechny hráče</button></form>
+<form action="deactive" method="post">{% csrf_token %}<button type="submit" class="button">Deaktivovat všechny hráče</button></form>
 
 {% endblock content %}
 

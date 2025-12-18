@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block styly %}
+<link rel="stylesheet" href="{% static 'tutorialapp/tutorial.css' %}">
+{% endblock styly %}
+
 
 {% block content %}
 
@@ -13,7 +19,7 @@
     {% csrf_token %}
     <input type="hidden" name="player_id" value="{{ chosen_player.id }}">
 
-    <button type="submit">ZAČÍT HRU</button>
+    <button type="submit" class="button">ZAČÍT HRU</button>
 
 </form>
 

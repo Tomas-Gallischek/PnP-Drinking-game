@@ -1,21 +1,36 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block styly %}
+
+<link rel="stylesheet" href="{% static 'tutorialapp/tutorial.css' %}">
+
+{% endblock styly %}
 
 {% block content %}
 
 <h1>TUTORIAL:</h1>
-
 <h2>Identifikace hráče:</h2>
 
-{% for player in all_players  %}
-    {% if player.active == False %}
-        <p></p>
-        <form action="{% url "vyber_povolani" %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="player_id" value="{{ player.id }}">
-            <button type="submit" class="button"><img src="{{ player.profile_img.url }}" alt="profilovka" class="player-avatar" width="100" height="100"></button>
-        </form>
-    {% endif %}
-{% endfor %}
+<div class="character-grid">
+    {% for player in all_players %}
+        {% if player.active == False %}
+            <form action="{% url "vyber_povolani" %}" method="post" class="char-form" style="--delay: {{ forloop.counter }};">
+                {% csrf_token %}
+                <input type="hidden" name="player_id" value="{{ player.id }}">
+                <button type="submit" class="button avatar-button">
+                    <div class="player-avatar-container">
+                        <img src="{{ player.profile_img.url }}" alt="profilovka" class="player-avatar">
+                    </div>
+                </button>
+            </form>
+        {% endif %}
+    {% endfor %}
+</div>
 
+<form action="{% url "tut_seznameni" %}">
+    <button type="submit" class="button">ZPĚT</button>
+    <input type="hidden" name="player_id" value="{{ player_id }}">
+</form>
 
 {% endblock content %}

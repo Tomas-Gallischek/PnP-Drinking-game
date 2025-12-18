@@ -20,12 +20,24 @@
         
     </div>
 
-    <form action="{% url 'fight' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn-fight"> 
-            ZAHÁJIT SOUBOJ 
-        </button>
-        <input type="hidden" name="boss_id" value="{{ actual_boss.id }}">
-    </form>
+    {% if start_status == True %}
+        <form action="{% url 'fight' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-fight"> 
+                ZAHÁJIT SOUBOJ 
+            </button>
+            <input type="hidden" name="boss_id" value="{{ actual_boss.id }}">
+        </form>
+    {% else %}
+        <div class="energy-warning">
+            <h2>Někteří hráči nemají dostatek energie!</h2>
+            <ul>
+                {% for player in low_energy_players %}
+                    <p>{{ player.name }} - Energie: {{ player.energie }}</p>
+                {% endfor %}
+            </ul>
+            <p>Počkejte, až si hráči doplní energii.</p>
+        </div>
+    {% endif %}
 </div>
 {% endblock content %}
