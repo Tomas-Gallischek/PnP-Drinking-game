@@ -76,6 +76,8 @@ def fight(request):
             
             # ZÁZNAM TAHU HRÁČE
             TurnLog.objects.create(
+                boss_max_hp=actual_boss.hp,
+                target_player_max_hp=current_player.hp_now,
                 fight=fight_log,
                 turn_number=turn_counter,
                 attacker_is_boss=False,
@@ -224,6 +226,9 @@ def fight(request):
         "fight_log": fight_log,
         "turn_logs": turn_log
     })
+
+
+
 
 
 def dungeon(request):

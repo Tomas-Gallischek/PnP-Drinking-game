@@ -70,8 +70,11 @@ class TurnLog(models.Model):
     target_armor_roll = models.IntegerField(verbose_name="Hod brnění cíle")
     
     # Stavy po tahu
+    boss_max_hp = models.IntegerField(verbose_name="Maximální HP Bosse", null=True, blank=True)
     boss_hp_after = models.IntegerField(verbose_name="HP Bosse po tahu")
+
     target_player_hp_after = models.IntegerField(null=True, blank=True, verbose_name="HP Hráče po tahu")
+    target_player_max_hp = models.IntegerField(null=True, blank=True, verbose_name="Maximální HP Hráče")
 
     def __str__(self):
         return f"Tah {self.turn_number} v boji {self.fight_id}"
