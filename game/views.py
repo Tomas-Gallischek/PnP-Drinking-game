@@ -2,6 +2,7 @@ from hmac import new
 from math import e
 from multiprocessing import context
 from os import error
+import profile
 import re
 from django.shortcuts import render, redirect
 from django.db.models import Q
@@ -258,12 +259,17 @@ def index(request):
 
 
 def reset(request):
-
-
     if request.method == 'POST':
+
         player.objects.all().delete()
-        random_pocet_hracu = random.randint(6, 12)
-        for i in range(random_pocet_hracu):
+        achievements.objects.all().delete()
+        boss.objects.all().delete()
+
+        players_default = jmena_hracu.objects.all()
+
+
+
+        for i in players_default:
             moznosti_povolani = ['mag', 'valecnik', 'hunter']
             povolani = random.choice(moznosti_povolani)
             if povolani == 'mag':
@@ -274,6 +280,7 @@ def reset(request):
                 obrana_koef = 1.5
                 hp = 70
                 hp_koef = 50
+                role_id = 1
             elif povolani == 'valecnik': 
                 dmg = 12
                 # dmg_koef = 4
@@ -282,6 +289,7 @@ def reset(request):
                 obrana_koef = 3
                 hp = 120
                 hp_koef = 150
+                role_id = 3
             elif povolani == 'hunter':
                 dmg = 14
                 # dmg_koef = 6
@@ -290,6 +298,7 @@ def reset(request):
                 obrana_koef = 2.5
                 hp = 90
                 hp_koef = 100
+                role_id = 2
             else:
                 povolani = 'obycejny clovek'
                 dmg = 1
@@ -298,14 +307,20 @@ def reset(request):
                 obrana_koef = 1
                 hp = 1
                 hp_koef = 1
+                role_id = 4
 
             new_player = player.objects.create(
                 active = True,
-                name=random.choice(jmena_hracu.objects.values_list('name', flat=True)) + f" - {povolani}",
+                name=i.name,
+                gender = i.gender,
+                profile_img=i.player_profile_img,
+                skill_points=0,
+                role_img_id = role_id,
                 xp=0,
                 lvl=1,
                 score=0,
-                energie=100,
+                energie=0,
+                last_energy_update=timezone.now(),
                 povolani=povolani,
                 dmg=dmg,
                 dmg_koef=dmg_koef,
@@ -322,37 +337,40 @@ def reset(request):
                 velky_kelimek=0,
             )
             new_player.save()
-
-            achievements.objects.all().delete()
-            for p in player.objects.all():
-                new_achivments = achievements.objects.create(
-                    player=p,
-                )
-
-            pocet = player.objects.count()
-            pocet_hracu_instance = pocet_hracu.objects.first()
-            pocet_hracu_instance.pocet_hracu_now = pocet
-            pocet_hracu_instance.pocet_hracu_full = pocet
-            pocet_hracu_instance.pocet_hracu_off = 0
-            pocet_hracu_instance.save()
+            print(f"Vytvořen hráč: {new_player.name} s povoláním {new_player.povolani}")
 
             
-            boss.objects.all().delete()
-            first_boss = boss_names_descriptions.objects.get(patro=1)
-            boss.objects.create(
-                name = first_boss.name,
-                patro = 1,
-                description = first_boss.description,
-                defeated = False,
-                lvl = 1,
-                dmg = 15,
-                armor = 5,
-                hp = 200,
-                reward_xp = 200
+        for p in player.objects.all():
+            new_achivments = achievements.objects.create(
+                player=p,
             )
-            print(f"Hráč {new_player.name} vytvořen.")
-            print(f"Celkem hráčů: {player.objects.count()}")
-        return redirect('index')
+
+        pocet = player.objects.count()
+        pocet_hracu_instance = pocet_hracu.objects.first()
+        pocet_hracu_instance.pocet_hracu_now = pocet
+        pocet_hracu_instance.pocet_hracu_full = pocet
+        pocet_hracu_instance.pocet_hracu_off = 0
+        pocet_hracu_instance.save()
+        print(f"Aktuální počet hráčů: {pocet}")
+
+        
+        
+        first_boss = boss_names_descriptions.objects.get(patro=1)
+        boss.objects.create(
+            name = first_boss.name,
+            boss_img = first_boss.boss_img,
+            patro = 1,
+            description = first_boss.description,
+            defeated = False,
+            lvl = 1,
+            dmg = 15,
+            armor = 5,
+            hp = 200,
+            reward_xp = 200
+        )
+        print("Vytvořen první boss.")
+            
+
     return redirect('index')
 
 

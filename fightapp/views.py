@@ -1,3 +1,4 @@
+from operator import ne
 import random
 from typing import Self
 from django.shortcuts import render
@@ -25,7 +26,7 @@ def fight(request):
     
     # Dynamické HP bosse
     pocet_hracu_now = pocet_hracu.objects.first().pocet_hracu_now 
-    boss_hp = (actual_boss.hp * pocet_hracu_now) * 0.8
+    boss_hp = actual_boss.hp
     
     # Inicializace proměnných pro boj
     players = player.objects.filter(active=True)
@@ -76,8 +77,6 @@ def fight(request):
             
             # ZÁZNAM TAHU HRÁČE
             TurnLog.objects.create(
-                boss_max_hp=actual_boss.hp,
-                target_player_max_hp=current_player.hp_now,
                 fight=fight_log,
                 turn_number=turn_counter,
                 attacker_is_boss=False,
@@ -86,8 +85,11 @@ def fight(request):
                 damage_dealt=dmg_delt,
                 attacker_damage_roll=current_player_dmg_roll, 
                 target_armor_roll=boss_armor_roll,
+
+                boss_max_hp=actual_boss.hp,
                 boss_hp_after=max(0, boss_hp), # Ujistíme se, že HP není záporné
                 target_player_hp_after=current_player.hp_actual_fight, # HP hráče se nemění, ale zaznamenáme aktuální
+                target_player_max_hp=current_player.hp_now,
             )
             # Konec záznamu tahu hráče
 
@@ -143,8 +145,11 @@ def fight(request):
                 damage_dealt=dmg_delt,
                 attacker_damage_roll=boss_dmg_roll, 
                 target_armor_roll=target_player_armor_roll,
+
                 boss_hp_after=max(0, boss_hp), # HP bosse se nemění, ale zaznamenáme aktuální
+                boss_max_hp=actual_boss.hp,
                 target_player_hp_after=max(0, target_player.hp_actual_fight),
+                target_player_max_hp=target_player.hp_now,
             )
             # Konec záznamu tahu bosse
             
@@ -188,13 +193,12 @@ def fight(request):
         p.score_counter()
         p.save()
 
-    turn_log = TurnLog.objects.filter(fight=fight_log).order_by('damage_dealt')
+    turn_log = TurnLog.objects.filter(fight=fight_log).order_by('turn_number')
 
     if winner == "players":
         # Vytvoření dalšího bosse
         next_patro = patro + 1
-        boss_names = boss_names_descriptions.objects.get(patro=next_patro).name
-        boss_description = boss_names_descriptions.objects.get(patro=next_patro).description
+        next_boss_info = boss_names_descriptions.objects.get(patro=next_patro)
         next_lvl = actual_boss.lvl + 1
         next_reward = actual_boss.reward_xp * 1.1
         hraci = pocet_hracu.objects.first()
@@ -207,17 +211,20 @@ def fight(request):
             p.save()
 
         boss.objects.create(
-            name = boss_names,
+            name = next_boss_info.name,
             patro = next_patro,
-            description = boss_description,
+            description = next_boss_info.description,
+            boss_img = next_boss_info.boss_img,
             defeated = False,
             lvl = next_lvl,
-            dmg = ((hraci.all_players_dmg) / pocet_hracu_now)* 0.9,
-            armor = ((hraci.all_players_armor) / pocet_hracu_now) * 0.5,
-            hp = ((hraci.all_player_hp) / pocet_hracu_now)* 1.3,
+
+            dmg = ((hraci.all_players_dmg) / pocet_hracu_now) + (actual_boss.dmg),
+            armor = ((hraci.all_players_armor) / pocet_hracu_now) + (actual_boss.armor),
+            hp = ((hraci.all_player_hp) / pocet_hracu_now) + (actual_boss.hp),
+
             reward_xp = round(next_reward)
         )
-        print(f"Nový boss: {boss_names} Patro: {next_patro} Level: {next_lvl} Reward XP: {next_reward}"),
+        print(f"Nový boss: {next_boss_info.name} Patro: {next_patro} Level: {next_lvl} Reward XP: {next_reward}"),
     
 
 

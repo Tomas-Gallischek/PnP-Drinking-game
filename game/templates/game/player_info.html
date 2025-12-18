@@ -24,7 +24,7 @@
             </div>
 
             <div class="player-progress-section">
-                <h3><b>{{ one_player.povolani }}</b></h3>
+                <h3><b><img src="/media/icons/{{one_player.role_img_id}}{{ one_player.gender }}.png" alt="{{ one_player.gender }}" width="40" height="40">  {{ one_player.povolani }}</b></h3>
                 
                 <div class="progress-container">
                     <label><img src="/media/icons/xp.png" alt="xp" width="30" height="30">: {{ one_player.xp }} / {{ one_player.xp_need }}</label>
@@ -106,9 +106,6 @@
         <p></p>
         
     </form>
-
-    <h1>Vstup do dungeonu:</h1>
-    <button class="button"><a href="{% url 'dungeon' %}">Dungeon</a></button>
 
     <h1>Side quest</h1>
     <form action="{% url "sidequest" %}" method="post">

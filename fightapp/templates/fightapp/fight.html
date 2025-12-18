@@ -4,424 +4,407 @@
 {% block content %}
 
 <style>
-    /* Základní rozvržení arény */
-    .arena-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: url('{% static "game/img/dungeon_bg.jpg" %}') no-repeat center center; /* Pokud máš pozadí */
-        background-size: cover;
-        background-color: #2c3e50;
-        min-height: 500px;
-        border-radius: 15px;
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
-        color: white;
-        font-family: 'Verdana', sans-serif;
-        box-shadow: inset 0 0 50px #000;
+    :root {
+        --arena-bg: #2c3e50;
+        --hp-green: #2ecc71;
+        --hp-red: #e74c3c;
+        --text-gold: #f1c40f;
     }
 
-    /* Karty bojovníků */
-    .fighter-card {
-        width: 300px;
-        text-align: center;
+    .arena-wrapper {
         position: relative;
+        width: 100%;
+        max-width: 900px;
+        height: 500px;
+        margin: 2rem auto;
+        background: url('{% static "game/img/dungeon_bg.jpg" %}') no-repeat center bottom;
+        background-size: cover;
+        background-color: var(--arena-bg);
+        background-opacity: 0.5;
+        border: 4px solid #4a3b2a;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.8) inset;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end; /* Postavy stojí na zemi */
+        padding: 0 50px 80px 50px; /* Odsazení od krajů a zespodu */
+    }
+
+    /* Karta bojovníka */
+    .fighter {
+        position: relative;
+        width: 200px;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         transition: transform 0.2s;
         z-index: 10;
     }
 
-    .fighter-image-wrapper {
+    /* Obrázek postavy */
+    .fighter-img {
         width: 200px;
         height: 200px;
-        margin: 0 auto;
-        position: relative;
-    }
-
-    .fighter-image {
-        width: 100%;
-        height: 100%;
         object-fit: contain;
-        filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+        filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
+        transition: filter 0.3s;
     }
 
-    /* Health Bar */
-    .health-bar-container {
+    .fighter-img.dead {
+        filter: grayscale(100%) blur(2px);
+        opacity: 0.6;
+    }
+
+    /* Health Bar Container */
+    .hp-box {
         width: 100%;
+        background: #333;
+        border: 2px solid #000;
+        border-radius: 5px;
         height: 25px;
-        background-color: #444;
-        border: 2px solid #222;
-        border-radius: 10px;
         margin-top: 10px;
         position: relative;
-        overflow: hidden;
     }
 
-    .health-bar-fill {
+    .hp-bar {
         height: 100%;
         background: linear-gradient(90deg, #e74c3c, #c0392b);
-        width: 100%; /* JS bude měnit */
+        width: 100%;
         transition: width 0.5s ease-out;
     }
 
-    .health-text {
+    .hp-text {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
-        line-height: 22px;
+        text-align: center;
+        color: white;
         font-weight: bold;
+        line-height: 22px;
         font-size: 14px;
         text-shadow: 1px 1px 2px black;
     }
 
-    /* VS text uprostřed */
-    .vs-text {
-        font-size: 3rem;
-        font-weight: 900;
-        color: #f1c40f;
-        text-shadow: 2px 2px 10px #000;
-        z-index: 5;
+    .name-tag {
+        background: rgba(0,0,0,0.6);
+        color: white;
+        padding: 2px 10px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+        font-weight: bold;
+        text-align: center;
     }
 
-    /* Plovoucí text poškození (Floating Combat Text) */
-    .damage-number {
+    /* --- ANIMACE --- */
+    
+    /* Útok hráče (zleva doprava) */
+    @keyframes lunge-right {
+        0% { transform: translateX(0); }
+        30% { transform: translateX(-20px) rotate(-5deg); } /* Nápřah */
+        50% { transform: translateX(150px) rotate(5deg); } /* Úder */
+        100% { transform: translateX(0); }
+    }
+
+    /* Útok bosse (zprava doleva) */
+    @keyframes lunge-left {
+        0% { transform: translateX(0); }
+        30% { transform: translateX(20px) rotate(5deg); } /* Nápřah */
+        50% { transform: translateX(-150px) rotate(-5deg); } /* Úder */
+        100% { transform: translateX(0); }
+    }
+
+    /* Otřes při zásahu */
+    @keyframes shake-hit {
+        0% { transform: translate(0, 0); filter: brightness(1); }
+        10% { transform: translate(-5px, 0); filter: brightness(2) sepia(1) saturate(5) hue-rotate(-50deg); } /* Zčervenání */
+        30% { transform: translate(5px, 0); }
+        50% { transform: translate(-5px, 0); }
+        70% { transform: translate(5px, 0); }
+        100% { transform: translate(0, 0); filter: brightness(1); }
+    }
+
+    /* Plovoucí damage text */
+    .dmg-floater {
         position: absolute;
         top: 20%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 3rem;
-        font-weight: bold;
         color: #ff0000;
-        text-shadow: 2px 2px 0 #fff;
+        font-size: 3rem;
+        font-weight: 900;
+        text-shadow: 0 0 5px #fff, 2px 2px 0 #000;
         opacity: 0;
         pointer-events: none;
         z-index: 20;
     }
 
-    /* Tlačítka ovládání */
-    .controls {
+    @keyframes float-up-fade {
+        0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); }
+        20% { transform: translate(-50%, -30px) scale(1.5); }
+        100% { opacity: 0; transform: translate(-50%, -80px) scale(1); }
+    }
+
+    /* Aplikace animací třídami */
+    .anim-attack-right { animation: lunge-right 0.6s ease-in-out; }
+    .anim-attack-left { animation: lunge-left 0.6s ease-in-out; }
+    .anim-shake { animation: shake-hit 0.4s ease-in-out; }
+    .anim-float { animation: float-up-fade 1.5s forwards; }
+
+    /* UI Prvky */
+    .battle-ui {
         text-align: center;
         margin-top: 20px;
     }
 
-    .btn-fight {
+    #log-display {
+        min-height: 40px;
         font-size: 1.2rem;
-        padding: 10px 30px;
-    }
-
-    /* LOG TEXT */
-    #battle-log-text {
-        text-align: center;
-        margin-top: 15px;
-        font-size: 1.2rem;
+        color: #333;
         font-style: italic;
-        color: #bdc3c7;
-        min-height: 30px;
+        margin-bottom: 20px;
     }
 
-    /* ANIMACE */
-    
-    /* Útok hráče (zleva doprava) */
-    @keyframes attack-right {
-        0% { transform: translateX(0); }
-        40% { transform: translateX(50px) rotate(10deg); }
-        50% { transform: translateX(150px) scale(1.1); }
-        100% { transform: translateX(0); }
+    .btn-start {
+        font-size: 1.5rem;
+        padding: 10px 40px;
+        box-shadow: 0 4px 0 #2c3e50;
+        transition: all 0.1s;
     }
-
-    /* Útok bosse (zprava doleva) */
-    @keyframes attack-left {
-        0% { transform: translateX(0); }
-        40% { transform: translateX(-50px) rotate(-10deg); }
-        50% { transform: translateX(-150px) scale(1.1); }
-        100% { transform: translateX(0); }
+    .btn-start:active {
+        transform: translateY(4px);
+        box-shadow: none;
     }
-
-    /* Zásah (otřes) */
-    @keyframes shake {
-        0% { transform: translate(1px, 1px) rotate(0deg); filter: brightness(1); }
-        10% { transform: translate(-1px, -2px) rotate(-1deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); } /* Zčervenání */
-        20% { transform: translate(-3px, 0px) rotate(1deg); }
-        30% { transform: translate(3px, 2px) rotate(0deg); }
-        40% { transform: translate(1px, -1px) rotate(1deg); }
-        50% { transform: translate(-1px, 2px) rotate(-1deg); }
-        60% { transform: translate(-3px, 1px) rotate(0deg); }
-        100% { transform: translate(0, 0) rotate(0deg); filter: brightness(1); }
-    }
-
-    /* Zobrazení čísla */
-    @keyframes float-up {
-        0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); }
-        20% { transform: translate(-50%, -20px) scale(1.5); }
-        80% { opacity: 1; transform: translate(-50%, -50px) scale(1); }
-        100% { opacity: 0; transform: translate(-50%, -80px); }
-    }
-
-    .anim-attack-player { animation: attack-right 0.4s ease-in-out; }
-    .anim-attack-boss { animation: attack-left 0.4s ease-in-out; }
-    .anim-hit { animation: shake 0.5s; }
-    .anim-damage { animation: float-up 1s ease-out forwards; }
-    .dead { filter: grayscale(100%) blur(2px); opacity: 0.6; }
 
 </style>
 
-<div class="container my-4">
-    <h1 class="text-center mb-4">⚔️ Aréna ⚔️</h1>
-
-    <div class="arena-container">
+<div class="container">
+    <div class="arena-wrapper">
         
-        <div class="fighter-card" id="player-card">
-            <h3 id="player-name">Hráč</h3>
-            <div class="fighter-image-wrapper">
-                <img src="" id="player-img" class="fighter-image" alt="Player">
-                <div class="damage-number" id="player-dmg-text"></div>
+        <div class="fighter" id="hero-slot">
+            <div class="name-tag" id="hero-name">Hráč</div>
+            
+            <div style="position: relative;">
+                <img src="{% static 'game/img/default_avatar.png' %}" id="hero-img" class="fighter-img" alt="Hrdina">
+                <div class="dmg-floater" id="hero-dmg-float"></div>
             </div>
-            <div class="health-bar-container">
-                <div class="health-bar-fill" id="player-hp-bar"></div>
-                <div class="health-text" id="player-hp-text">? / ?</div>
+
+            <div class="hp-box">
+                <div class="hp-bar" id="hero-hp-bar" style="width: 100%;"></div>
+                <div class="hp-text" id="hero-hp-text">připraven</div>
             </div>
         </div>
 
-        <div class="vs-text">VS</div>
-
-        <div class="fighter-card" id="boss-card">
-            <h3>{{ fight_log.boss.name }}</h3>
-            <div class="fighter-image-wrapper">
+        <div class="fighter" id="boss-slot">
+            <div class="name-tag">{{ fight_log.boss.name }} (Lvl {{ fight_log.boss.lvl }})</div>
+            
+            <div style="position: relative;">
                 {% if fight_log.boss.boss_img %}
-                    <img src="{{ fight_log.boss.boss_img.url }}" class="fighter-image" alt="Boss">
+                    <img src="{{ fight_log.boss.boss_img.url }}" id="boss-img" class="fighter-img" alt="Boss">
                 {% else %}
-                    <img src="{% static 'game/img/default_boss.png' %}" class="fighter-image" alt="Boss">
+                    <img src="{% static 'game/img/default_boss.png' %}" id="boss-img" class="fighter-img" alt="Boss">
                 {% endif %}
-                <div class="damage-number" id="boss-dmg-text"></div>
+                <div class="dmg-floater" id="boss-dmg-float"></div>
             </div>
-            <div class="health-bar-container">
-                <div class="health-bar-fill" id="boss-hp-bar"></div>
-                <div class="health-text" id="boss-hp-text">?</div>
+
+            <div class="hp-box">
+                <div class="hp-bar" id="boss-hp-bar" style="width: 100%;"></div>
+                <div class="hp-text" id="boss-hp-text">100%</div>
             </div>
         </div>
-
     </div>
 
-    <div id="battle-log-text">Klikni na Start pro zahájení replaye...</div>
-
-    <div class="controls">
-        <button class="btn btn-success btn-fight" onclick="startBattle()">▶ Přehrát Souboj</button>
-        <button class="btn btn-secondary btn-fight" onclick="togglePause()">⏸ Pauza</button>
-        <a href="{% url 'dungeon' %}" class="btn btn-primary btn-fight" id="btn-back" style="display:none;">Zpět do Dungeonu</a>
+    <div class="battle-ui">
+        <div id="log-display">Připraven k boji...</div>
+        
+        <button class="btn btn-warning btn-start" id="btn-start-battle" onclick="runBattle()">▶ Přehrát Souboj</button>
+        
+        <div id="end-screen" style="display:none; margin-top: 20px;">
+            <h2 id="end-title"></h2>
+            <a href="{% url 'dungeon' %}" class="btn btn-primary btn-lg">Zpět do Dungeonu</a>
+        </div>
     </div>
-
-    <div id="battle-result" class="alert mt-4 text-center" style="display:none;">
-        <h2 id="result-title"></h2>
-        <p>Celkové poškození udělené hráči: <strong>{{ fight_log.total_damage_dealt_by_players }}</strong></p>
-    </div>
-
 </div>
 
 <script>
-    // Předání dat z Django do JS proměnné
-    const battleData = [
+    // 1. PŘÍPRAVA DAT Z DJANGO DO JS
+    // Tady si vytáhneme čistá data z logů. 
+    // Důležité: Pokud útočí boss, potřebujeme vědět, na koho útočí, abychom změnili obrázek vlevo.
+    const fightData = [
         {% for turn in turn_logs %}
         {
             turn: {{ turn.turn_number }},
-            is_boss_attack: {% if turn.attacker_is_boss %}true{% else %}false{% endif %},
-            
-            // Info o útočníkovi a cíli
-            attacker_name: "{% if turn.attacker_is_boss %}{{ fight_log.boss.name }}{% else %}{{ turn.attacker_player.name }}{% endif %}",
-            target_name: "{% if turn.attacker_is_boss %}{{ turn.target_player.name }}{% else %}{{ fight_log.boss.name }}{% endif %}",
-            
-            // URL Obrázků (zajistíme fallback, pokud obrázek není)
-            player_img: "{% if turn.attacker_is_boss %}{% if turn.target_player.profile_img %}{{ turn.target_player.profile_img.url }}{% endif %}{% else %}{% if turn.attacker_player.profile_img %}{{ turn.attacker_player.profile_img.url }}{% endif %}{% endif %}",
-
-            // Čísla
+            is_boss_attacker: {% if turn.attacker_is_boss %}true{% else %}false{% endif %},
             dmg: {{ turn.damage_dealt }},
-            boss_hp: {{ turn.boss_hp_after }},
-            // Pokud je cíl boss, target_player_hp_after je null, musíme to ošetřit
-            player_hp: {% if turn.target_player_hp_after is not None %}{{ turn.target_player_hp_after }}{% else %}null{% endif %}
+            
+            // Jméno a Avatar aktivního hráče (buď útočník, nebo oběť)
+            player_name: "{% if turn.attacker_is_boss %}{{ turn.target_player.name }}{% else %}{{ turn.attacker_player.name }}{% endif %}",
+            player_img_url: "{% if turn.attacker_is_boss %}{% if turn.target_player.profile_img %}{{ turn.target_player.profile_img.url }}{% endif %}{% else %}{% if turn.attacker_player.profile_img %}{{ turn.attacker_player.profile_img.url }}{% endif %}{% endif %}",
+            
+            // Stav HP po tahu
+            boss_hp_after: {{ turn.boss_hp_after }},
+            boss_max_hp: {{ turn.boss_max_hp|default:100 }}, // Fallback kdyby nebylo
+            
+            // HP Hráče (pozor, může být None v DB, pokud boss neútočil)
+            player_hp_after: {% if turn.target_player_hp_after is not None %}{{ turn.target_player_hp_after }}{% else %}null{% endif %},
+            player_max_hp: {% if turn.target_player_max_hp is not None %}{{ turn.target_player_max_hp }}{% else %}100{% endif %}
         },
         {% endfor %}
     ];
 
-    // Výsledek boje
     const finalOutcome = "{{ fight_log.outcome }}";
-    const finalBossHp = {{ fight_log.final_boss_hp }};
-    
-    // Zkusíme odhadnout MAX HP pro vykreslení baru (vezmeme nejvyšší HP z logů nebo aktuální + dmg)
-    // Toto je jednoduchá heuristika, ideálně bys měl posílat max_hp z backendu
-    let maxBossHp = battleData.length > 0 ? (battleData[0].boss_hp + battleData[0].dmg) : 100;
-    // Pokud je první tah útok bosse, HP bosse se nemění, tak vezmeme rovnou
-    if(battleData.length > 0 && battleData[0].is_boss_attack) maxBossHp = battleData[0].boss_hp;
 
-    // Pro hráče je to složitější, protože se střídají. Budeme prostě zobrazovat HP.
-</script>
+    // 2. ELEMENTY
+    const els = {
+        heroSlot: document.getElementById('hero-slot'),
+        bossSlot: document.getElementById('boss-slot'),
+        heroImg: document.getElementById('hero-img'),
+        bossImg: document.getElementById('boss-img'),
+        heroName: document.getElementById('hero-name'),
+        heroHpBar: document.getElementById('hero-hp-bar'),
+        heroHpText: document.getElementById('hero-hp-text'),
+        bossHpBar: document.getElementById('boss-hp-bar'),
+        bossHpText: document.getElementById('boss-hp-text'),
+        logText: document.getElementById('log-display'),
+        heroDmgFloat: document.getElementById('hero-dmg-float'),
+        bossDmgFloat: document.getElementById('boss-dmg-float'),
+        btnStart: document.getElementById('btn-start-battle'),
+        endScreen: document.getElementById('end-screen'),
+        endTitle: document.getElementById('end-title')
+    };
 
-<script>
-    let currentTurnIndex = 0;
-    let isPaused = false;
-    let battleInterval;
-    const turnDelay = 1500; // Rychlost tahů v ms
+    // Pomocná funkce pro čekání (Sleep)
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // Elementy
-    const playerCard = document.getElementById('player-card');
-    const playerImg = document.getElementById('player-img');
-    const playerName = document.getElementById('player-name');
-    const playerHpText = document.getElementById('player-hp-text');
-    const playerHpBar = document.getElementById('player-hp-bar');
-    const playerDmgText = document.getElementById('player-dmg-text');
+    // 3. HLAVNÍ FUNKCE SOUBOJE
+    async function runBattle() {
+        // Skryjeme tlačítko start
+        els.btnStart.style.display = 'none';
+        els.logText.innerText = "Souboj začíná!";
+        await wait(1000);
 
-    const bossCard = document.getElementById('boss-card');
-    const bossHpText = document.getElementById('boss-hp-text');
-    const bossHpBar = document.getElementById('boss-hp-bar');
-    const bossDmgText = document.getElementById('boss-dmg-text');
-
-    const logText = document.getElementById('battle-log-text');
-    const resultDiv = document.getElementById('battle-result');
-    const btnBack = document.getElementById('btn-back');
-
-    // Inicializace prvního stavu
-    function initBattle() {
-        if(battleData.length > 0) {
-            updateStats(battleData[0], true); // true = reset only
-        }
-    }
-
-    // Pomocná funkce pro čekání
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-    async function startBattle() {
-        // Reset
-        currentTurnIndex = 0;
-        resultDiv.style.display = 'none';
-        btnBack.style.display = 'none';
-        
-        // Loop přes všechny tahy
-        while (currentTurnIndex < battleData.length) {
-            if (isPaused) {
-                await sleep(100);
-                continue;
-            }
-
-            const turn = battleData[currentTurnIndex];
-            await playTurn(turn);
-            currentTurnIndex++;
+        // Projdeme všechny tahy jeden po druhém
+        for (let i = 0; i < fightData.length; i++) {
+            await playTurn(fightData[i]);
         }
 
-        // Konec boje
-        endBattle();
+        // Konec
+        showResult();
     }
 
-    function togglePause() {
-        isPaused = !isPaused;
-    }
-
+    // 4. ANIMACE JEDNOHO TAHU
     async function playTurn(turn) {
-        // 1. Nastavíme správného hráče (obrázek a jméno)
-        // Pokud útočí boss, cílem je hráč. Pokud útočí hráč, je to on.
-        // Data player_img jsme připravili v JSONu tak, že vždy obsahují URL hráče v daném kole.
-        if (turn.player_img) {
-            playerImg.src = turn.player_img;
+        // A) PŘÍPRAVA SCÉNY (Nastavení obrázku hráče vlevo)
+        // Vždy aktualizujeme levý slot na toho hráče, kterého se tah týká
+        if (turn.player_img_url) {
+            els.heroImg.src = turn.player_img_url;
         } else {
             // Fallback ikona
-            playerImg.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
+            els.heroImg.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
         }
+        els.heroName.innerText = turn.player_name;
         
-        // Jméno hráče
-        playerName.innerText = turn.is_boss_attack ? turn.target_name : turn.attacker_name;
+        // Resetujeme HP bar hráče na "full" vizuálně, pokud se změní postava, 
+        // nebo ho nastavíme na procenta, pokud známe předchozí stav (zjednodušení: dáme full, pokud nevíme)
+        // Pro efekt S&F je lepší nechat hráče, aby viděl, jak mu ubývá HP v rámci tahu.
 
+        await wait(200); // Krátká pauza na "výměnu" postavy
 
-        // 2. Text logu
-        logText.innerText = `Tah ${turn.turn}: ${turn.attacker_name} útočí na ${turn.target_name} za ${turn.dmg} poškození!`;
-
-        // 3. Animace ÚTOKU
-        if (turn.is_boss_attack) {
-            // Boss útočí na Hráče
-            bossCard.classList.add('anim-attack-boss');
-            await sleep(200); // Čas na "nápřah"
+        if (turn.is_boss_attacker) {
+            // --- SCÉNÁŘ: BOSS ÚTOČÍ NA HRÁČE ---
+            els.logText.innerText = `🐺 Boss útočí na ${turn.player_name}!`;
             
-            // Zásah!
-            playerCard.classList.add('anim-hit');
-            showDamage(playerDmgText, turn.dmg);
-            
+            // 1. Boss se napřáhne a sekne (animace CSS třídou)
+            els.bossSlot.classList.add('anim-attack-left');
+            await wait(300); // Počkáme na moment úderu (polovina animace)
+
+            // 2. Hráč dostane zásah (shake + číslo)
+            els.heroSlot.classList.add('anim-shake');
+            showFloatingDamage(els.heroDmgFloat, turn.dmg);
+
+            // 3. Aktualizace HP Hráče
+            updateHpBar(els.heroHpBar, els.heroHpText, turn.player_hp_after, turn.player_max_hp);
+
+            // 4. Úklid tříd po animaci
+            await wait(300); 
+            els.bossSlot.classList.remove('anim-attack-left');
+            await wait(200);
+            els.heroSlot.classList.remove('anim-shake');
+
         } else {
-            // Hráč útočí na Bosse
-            playerCard.classList.add('anim-attack-player');
-            await sleep(200);
-            
-            // Zásah!
-            bossCard.classList.add('anim-hit');
-            showDamage(bossDmgText, turn.dmg);
+            // --- SCÉNÁŘ: HRÁČ ÚTOČÍ NA BOSSE ---
+            els.logText.innerText = `⚔️ ${turn.player_name} útočí na Bosse!`;
+
+            // 1. Hráč se napřáhne a sekne
+            els.heroSlot.classList.add('anim-attack-right');
+            await wait(300);
+
+            // 2. Boss dostane zásah
+            els.bossSlot.classList.add('anim-shake');
+            showFloatingDamage(els.bossDmgFloat, turn.dmg);
+
+            // 3. Aktualizace HP Bosse
+            updateHpBar(els.bossHpBar, els.bossHpText, turn.boss_hp_after, turn.boss_max_hp);
+
+            // 4. Úklid
+            await wait(300);
+            els.heroSlot.classList.remove('anim-attack-right');
+            await wait(200);
+            els.bossSlot.classList.remove('anim-shake');
         }
 
-        // 4. Aktualizace HP (s malým zpožděním po zásahu)
-        await sleep(100);
-        updateHealthUI(turn);
-
-        // 5. Úklid tříd (reset animací)
-        await sleep(600); // Počkáme na dokončení animací
-        bossCard.classList.remove('anim-attack-boss', 'anim-hit');
-        playerCard.classList.remove('anim-attack-player', 'anim-hit');
-        
-        // Čekání před dalším tahem
-        await sleep(turnDelay - 900);
+        // Pauza mezi tahy
+        await wait(500);
     }
 
-    function showDamage(element, amount) {
-        element.innerText = "-" + amount;
-        // Reset animace - trik s reflow
-        element.classList.remove('anim-damage');
+    // Funkce pro zobrazení plovoucího čísla
+    function showFloatingDamage(element, dmg) {
+        if (dmg <= 0) {
+            element.innerText = "MISS";
+            element.style.color = "#bdc3c7";
+        } else {
+            element.innerText = "-" + dmg;
+            element.style.color = "#ff0000";
+        }
+        
+        // Restart animace (trik s reflow)
+        element.classList.remove('anim-float');
         void element.offsetWidth; 
-        element.classList.add('anim-damage');
+        element.classList.add('anim-float');
     }
 
-    function updateHealthUI(turn) {
-        // Boss HP
-        bossHpText.innerText = turn.boss_hp;
-        let bossPct = (turn.boss_hp / maxBossHp) * 100;
-        if (bossPct < 0) bossPct = 0;
-        bossHpBar.style.width = bossPct + "%";
+    // Funkce pro update HP baru
+    function updateHpBar(barEl, textEl, current, max) {
+        if (current === null) return; // Ošetření null
+        
+        // Ošetření záporných čísel
+        if (current < 0) current = 0;
 
-        // Player HP (jen pokud bylo zasaženo)
-        if (turn.player_hp !== null) {
-            playerHpText.innerText = turn.player_hp;
-            // Nemáme max HP hráče v logu, takže jen barva, nebo plný bar
-            // Případně můžeš udělat odhad jako u bosse
-            playerHpBar.style.width = "100%"; 
-            if (turn.player_hp <= 0) {
-                playerHpBar.style.width = "0%";
-                playerImg.classList.add('dead');
-            } else {
-                playerImg.classList.remove('dead');
-            }
-        }
+        const percent = (current / max) * 100;
+        barEl.style.width = percent + "%";
+        textEl.innerText = `${current} / ${max}`;
     }
 
-    // Funkce pro nastavení statů bez animace (init)
-    function updateStats(turn, init) {
-        // ... (základní nastavení textů)
-    }
-
-    function endBattle() {
-        logText.innerText = "Souboj skončil!";
-        resultDiv.style.display = 'block';
-        btnBack.style.display = 'inline-block';
-
-        const title = document.getElementById('result-title');
+    // Závěrečná obrazovka
+    function showResult() {
+        els.endScreen.style.display = 'block';
         if (finalOutcome === 'players') {
-            title.innerHTML = "<span class='text-success'>🎉 VÍTĚZSTVÍ HRÁČŮ! 🎉</span>";
-            bossImg = document.querySelector('#boss-card img');
-            bossImg.classList.add('dead');
-            bossHpBar.style.width = "0%";
-            bossHpText.innerText = "0";
+            els.endTitle.innerHTML = "<span style='color:#2ecc71'>🎉 VÍTĚZSTVÍ! Boss byl poražen. 🎉</span>";
+            els.bossImg.classList.add('dead');
+            els.logText.innerText = "Sláva vítězům!";
         } else {
-            title.innerHTML = "<span class='text-danger'>💀 BOSS ZVÍTĚZIL! 💀</span>";
-            playerImg.classList.add('dead');
+            els.endTitle.innerHTML = "<span style='color:#e74c3c'>💀 PROHRA! Tým byl zmasakrován. 💀</span>";
+            els.heroImg.classList.add('dead'); // Poslední aktivní hráč
+            els.logText.innerText = "Čest poraženým...";
         }
     }
-
-    // Spustit fallback obrázek při chybě
+    
+    // Fallback pro chybějící obrázky
     document.querySelectorAll('img').forEach(img => {
         img.onerror = function() {
-            this.src = '{% static "game/img/default_avatar.png" %}'; // Uprav si cestu k defaultnímu avataru
+            this.src = '{% static "game/img/default_avatar.png" %}'; 
         };
     });
 

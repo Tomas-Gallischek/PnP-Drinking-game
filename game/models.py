@@ -75,7 +75,8 @@ class pocet_hracu(models.Model):
 class player(models.Model):
     profile_img = models.ImageField(upload_to='profile_images/', blank=True, null=True)
     role_img_id = models.IntegerField(blank=True, null=True) # 1 = mág, 2 = hunter, 3 = warrior
-    
+    gender = models.CharField(max_length=10, blank=True, null=True)
+
     active = models.BooleanField(default=False)
     name = models.CharField(max_length=100, blank=True)
     lvl = models.IntegerField(default=1, blank=True)
@@ -259,6 +260,9 @@ class achievements(models.Model):
     
 class jmena_hracu(models.Model):
     name = models.CharField(max_length=100, blank=True)
+    gender = models.CharField(max_length=10, blank=True, null=True)
+    player_profile_img = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+
 
     def __str__(self):
         return self.name

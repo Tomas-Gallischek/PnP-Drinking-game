@@ -14,6 +14,9 @@ class boss(models.Model):
     name = models.CharField(max_length=100)
     patro = models.IntegerField(default=1)
     description = models.TextField(blank=True)
+
+    boss_img = models.ImageField(upload_to='boss_images/', blank=True, null=True)
+    
     defeated = models.BooleanField(default=False)
 
     lvl = models.IntegerField(default=1)
