@@ -192,6 +192,7 @@ def fight(request):
         # Vytvoření dalšího bosse
         next_patro = patro + 1
         boss_names = boss_names_descriptions.objects.get(patro=next_patro).name
+        boss_description = boss_names_descriptions.objects.get(patro=next_patro).description
         next_lvl = actual_boss.lvl + 1
         next_reward = actual_boss.reward_xp * 1.1
         hraci = pocet_hracu.objects.first()
@@ -206,7 +207,7 @@ def fight(request):
         boss.objects.create(
             name = boss_names,
             patro = next_patro,
-            description = "Lorem Ipsum",
+            description = boss_description,
             defeated = False,
             lvl = next_lvl,
             dmg = ((hraci.all_players_dmg) / pocet_hracu_now)* 0.9,

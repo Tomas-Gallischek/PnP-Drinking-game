@@ -203,7 +203,9 @@ class side_quest(models.Model):
     ('coop', 'Coop')
     ]
     player = models.ForeignKey(player, on_delete=models.CASCADE, related_name='side_quests')
+    player_name = models.CharField(max_length=100, blank=True)
     player_coop = models.CharField(max_length=100, blank=True)
+    coop_player_name = models.CharField(max_length=100, blank=True)
     quest_type = models.CharField(max_length=100, blank=True, choices=quest_type_choices)
     quest_name = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)

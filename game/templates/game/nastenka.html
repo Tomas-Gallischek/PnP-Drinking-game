@@ -1,29 +1,51 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block styly %}
+    <link rel="stylesheet" href="{% static 'game/side_quest.css' %}">
+{% endblock styly %}
 
 {% block content %}
 
-
 {% if all_quests %}
+    <div class="quests-container">
+        
+        {% for quest in all_quests %}
+            {% if quest.done == False %}
+                
+                <div class="quest-card">
+                    
+                    <div class="quest-header-info">
+                        Hráč: <b>{{ quest.player_name }}</b>
+                    </div>
 
-    {% for quest in all_quests %}
-        {% if quest.done == False %}
-            <h2>Hráč: <b>{{ quest.player }}</b></h2>
-            <h3>Název úkolu: <b>{{ quest.quest_name }}</b></h3>
-            <p>Popis: {{ quest.description }}</p>
-            <p>Odměna XP: {{ quest.xp_reward }}</p>
-            <p>Raritka: {{ quest.rarity }}</p>
+                    <h4>{{ quest.quest_name }}</h4>
+                    <p class="quest-description">{{ quest.description }}</p>
 
-            <form action="{% url "quest_done" %}" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="quest_id" value="{{ quest.id }}">
-                <button type="submit">Splnit úkol</button>
-            </form>
-        {% endif %}
-    {% endfor %}
+                    <div class="quest-reward">
+                        <span>✨ {{ quest.xp_reward }} XP</span>
+                        <span style="font-size: 0.8em; color: #b8860b;">({{ quest.rarity }})</span>
+                    </div>
+
+                    <div class="quest-action-area">
+                        <form action="{% url 'quest_done' %}" method="post" style="width: 100%;">
+                            {% csrf_token %}
+                            <input type="hidden" name="quest_id" value="{{ quest.id }}">
+                            <button type="submit" class="quest-button">Splnit úkol</button>
+                        </form>
+                    </div>
+
+                </div>
+
+            {% endif %}
+        {% endfor %}
+
+    </div>
 
 {% else %}
-    <h1><p>Nikdo nemá aktivovaný žádný quest</p></h1> 
+    <div class="quests-container">
+        <h1><p>Nikdo nemá aktivovaný žádný quest</p></h1> 
+    </div>
 {% endif %}
-
 
 {% endblock content %}

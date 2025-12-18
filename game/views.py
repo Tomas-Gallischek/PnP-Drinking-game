@@ -107,7 +107,9 @@ def take_quest(request):
 
         new_quest = side_quest.objects.create(
             player=one_player,
+            player_name= one_player.name,
             player_coop= coop_player.name if coop_player else "",
+            coop_player_name= coop_player.name if coop_player else "",
             quest_type=selected_quest.quest_type,
             quest_name=selected_quest.quest_name,
             description=selected_quest.description,
@@ -336,11 +338,11 @@ def reset(request):
 
             
             boss.objects.all().delete()
-            first_boss_name = boss_names_descriptions.objects.get(patro=1).name
+            first_boss = boss_names_descriptions.objects.get(patro=1)
             boss.objects.create(
-                name = first_boss_name,
+                name = first_boss.name,
                 patro = 1,
-                description = "Lorem Ipsum",
+                description = first_boss.description,
                 defeated = False,
                 lvl = 1,
                 dmg = 15,

@@ -8,9 +8,11 @@
 {% block content %}
 <div class="dungeon-container">
     <h1>Dungeon {{ actual_boss.patro }} / 25</h1>
+    <h1>{{ actual_boss.name }}</h1>
+    <p>{{ actual_boss.description }}</p>
 
     <div class="boss-image-container">
-        {% if actual_boss_img.boss_img %}
+        {% if actual_boss_img %}
         <img src="{{ actual_boss_img.url }}" alt="boss_image">
         {% else %}
         <p>Obrázek nepřítomný</p>
@@ -21,7 +23,7 @@
     <form action="{% url 'fight' %}" method="post">
         {% csrf_token %}
         <button type="submit" class="btn-fight"> 
-            Souboj proti: {{ actual_boss.name }} 
+            ZAHÁJIT SOUBOJ 
         </button>
         <input type="hidden" name="boss_id" value="{{ actual_boss.id }}">
     </form>
