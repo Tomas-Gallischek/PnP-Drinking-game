@@ -6,12 +6,17 @@
 
 <h2>Nyní tě čeká tvůj první quest dobrodruhu:</h2>
 
-<p>Zazvoň na zvonek tajné heslo, které je: <b>"S" v morzeovce</b></p>
+<h3>Zazvoň na zvonek tajné heslo, které je:</h3>
 
-<p>Jakmile ti bude otevřeno, klikni na talčítko další.</p>
+<br>
+
+<h3><strong><u>"S" v morzeovce</u></strong></h3>
+
+
+<h3>Jakmile ti bude otevřeno, klikni na talčítko další.</h3>
 
 <form action="{% url "tut_odloz_si" %}">
-    <button type="submit">DALŠÍ</button>
+    <button type="submit" class="button">DALŠÍ</button>
     <input type="hidden" name="player_id" value="{{ player_id }}">
 </form>
 

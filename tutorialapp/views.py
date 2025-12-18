@@ -112,6 +112,12 @@ def vyber_povolani(request):
 def vyber_postavy(request):
 
     all_players = player.objects.all()
+
+# Deaktivace všech hráčů před výběrem nové postavy pokud dělám tutorial
+    for p in all_players:
+        p.active = False
+        p.save()
+        
     
 
     return render(request, 'tutorialapp/vyber_postavy.html', context={
