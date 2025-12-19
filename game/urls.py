@@ -17,5 +17,7 @@ urlpatterns = [
     path('active', views.active, name='active'),
     path('deactive', views.deactive, name='deactive'),
     path('quest_refresh', views.quest_refresh, name='quest_refresh'),
+    path('auto_stats', views.auto_stats, name='auto_stats'),
+    path('decret', views.decret, name='decret'),
 
 ]

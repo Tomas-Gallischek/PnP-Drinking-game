@@ -13,28 +13,28 @@ def tut_end(request):
         print(player_id, povolani)
 
         if povolani == 'mag':
-            dmg = 18
-            dmg_koef = 25
-            obrana = 2
-            obrana_koef = 1.5
+            dmg = 20
+            dmg_koef = 40
+            obrana = 5
+            obrana_koef = 5
             hp = 70
-            hp_koef = 50
+            hp_koef = 100
             role_id = 1
         elif povolani == 'valecnik': 
-            dmg = 12
-            dmg_koef = 10
-            obrana = 10
-            obrana_koef = 3
+            dmg = 10
+            dmg_koef = 25
+            obrana = 15
+            obrana_koef = 15
             hp = 120
-            hp_koef = 150
+            hp_koef = 300
             role_id = 3
         elif povolani == 'hunter':
             dmg = 14
-            dmg_koef = 15
-            obrana = 6
-            obrana_koef = 2.5
+            dmg_koef = 33
+            obrana = 10
+            obrana_koef = 10
             hp = 90
-            hp_koef = 100
+            hp_koef = 200
             role_id = 2
         else:
             povolani = 'obycejny clovek'
@@ -59,7 +59,7 @@ def tut_end(request):
         this_player.xp = 0
         this_player.lvl = 1
         this_player.score = 0
-        this_player.energie = 0
+        this_player.energie = 100
         this_player.last_energy_update = timezone.now()
         this_player.povolani = povolani
         this_player.dmg = dmg

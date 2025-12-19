@@ -6,20 +6,26 @@
 {% endblock styly %}
 
 {% block content %}
-<div class="dungeon-container">
-    <h1>Dungeon {{ actual_boss.patro }} / 25</h1>
-    <h1>{{ actual_boss.name }}</h1>
-    <p>{{ actual_boss.description }}</p>
 
-    <div class="boss-image-container">
-        {% if actual_boss_img %}
-        <img src="{{ actual_boss_img.url }}" alt="boss_image">
-        {% else %}
-        <p>Obrázek nepřítomný</p>
-        {% endif %}
-        
+{% if actual_patro < 26 %}
+    <div class="dungeon-container">
+        <h1>Dungeon {{ actual_boss.patro }} / 25</h1>
+    </div>
+{% endif %}
+    <div class="dungeon-container">
+        <h1>{{ actual_boss.name }}</h1>
+        <p>{{ actual_boss.description }}</p>
+
+        <div class="boss-image-container">
+            {% if actual_boss_img %}
+            <img src="{{ actual_boss_img.url }}" alt="boss_image">
+            {% else %}
+            <p>Obrázek nepřítomný</p>
+            {% endif %}
+            
     </div>
 
+{% if actual_patro < 26 %}
     {% if start_status == True %}
         <form action="{% url 'fight' %}" method="post">
             {% csrf_token %}
@@ -40,4 +46,8 @@
         </div>
     {% endif %}
 </div>
+
+{% endif %}
+
+
 {% endblock content %}

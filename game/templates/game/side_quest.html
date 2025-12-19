@@ -18,14 +18,16 @@
 
     <form action="{% url 'quest_refresh' %}" method="post" class="refresh-quests-form">
         {% csrf_token %}
-        <button type="submit" class="button">Obnovit úkoly (20 energie)</button>
+        <button type="submit" class="button">Nové náhodné úkoly (50 energie)</button>
         <input type="hidden" name="player_id" value="{{ player_info.id }}">
     </form>
 
-    {% if player_info.energie > 20 %}
+    {% if player_info.energie > 50 %}
         <p class="energy-info">Aktuální energie: {{ player_info.energie }}</p>
+    {% elif player_info.energie > 20 and player_info.energie < 50 %}
+        <p class="energy-info-low">Nemáš dostatek energie pro reset úkolů. Tvoje energie je: {{ player_info.energie }}</p>
     {% else %}
-        <p class="energy-info-low">Nemáš dost energie na přijetí nebo obnovení úkolů! Aktuální energie: {{ player_info.energie }}</p>
+        <p class="energy-info-low">Nemáš dostatek energie pro přijetí úkolu. Tvoje energie je: {{ player_info.energie }}</p>
     {% endif %}
 
     <div class="quest-card">

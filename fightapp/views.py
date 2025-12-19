@@ -64,7 +64,6 @@ def fight(request):
                 
             current_player = random.choice(live_players) 
 
-
             # Výpočet poškození hráče a brnění bosse s rozptylem
             current_player_dmg_roll = round(current_player.dmg_now * (random.uniform(0.8, 1.2)))
             boss_armor_roll = round(current_boss_armor * (random.uniform(0.9, 1.1)))
@@ -97,8 +96,9 @@ def fight(request):
 
             # ACHIEVEMENTS UPDATE
             player_achievement = achievements.objects.get(player=current_player)
-
+            player_achievement.attack_counter += 1
             dmg_record = achievements.objects.filter(player=current_player).aggregate(Max('best_dmg_delt'))['best_dmg_delt__max'] or 0
+
 
             player_achievement.total_dmg_delt += dmg_delt
             if dmg_delt > dmg_record:
@@ -157,6 +157,7 @@ def fight(request):
             
             # ACHIEVEMENTS UPDATE
             player_achievement = achievements.objects.get(player=target_player)
+            player_achievement.attack_get += 1
 
             # POZOR! DO UDRŽENÉHO POŠKOZENÍ SE NEPOČÍTÁ ARMOR, PROTOŽE TANKOVÉ BY JINAK PARADOXNĚ MĚLI NEJMENŠÍ HODNOTY
             
@@ -220,9 +221,9 @@ def fight(request):
             defeated = False,
             lvl = next_lvl,
 
-            dmg = (((hraci.all_players_dmg) / pocet_hracu_now) / 7) + (actual_boss.dmg),
+            dmg = (((hraci.all_players_dmg) / pocet_hracu_now) / 4) + (actual_boss.dmg),
             armor = (((hraci.all_players_armor) / pocet_hracu_now) / 10) + (actual_boss.armor),
-            hp = (((hraci.all_player_hp) / pocet_hracu_now) / 5) + (actual_boss.hp),
+            hp = (((hraci.all_player_hp) / pocet_hracu_now) / 3) + (actual_boss.hp),
 
             reward_xp = round(next_reward)
         )
@@ -251,6 +252,7 @@ def dungeon(request):
 
     start_status = False
 
+    actual_patro = actual_boss.patro
     for p in energy_request:
         if p.energie < 50:
             print("Hráč", p.name, "má nedostatek energie:", p.energie)
@@ -270,7 +272,8 @@ def dungeon(request):
         "actual_boss": actual_boss,
         "all_boss": all_boss,
         "start_status": start_status,
-        "low_energy_players": low_energy_players
+        "low_energy_players": low_energy_players,
+        "actual_patro": actual_patro,
 
         
     })

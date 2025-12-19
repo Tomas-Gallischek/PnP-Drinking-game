@@ -9,6 +9,17 @@
 <div class="container">
     <div class="player-header">
         <h1><u></u> <b>{{ one_player.name }}</b></h1>
+
+        {% if actual_patro == 26 %}
+            <div class="glejt">
+                <form action="{% url 'decret' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="decret-button", name="player_id" value="{{ one_player.id }}">
+                        Zobrazit <b>Hrdinský glejt</b> 
+                    </button>
+                </form>
+            </div>
+        {% endif %}
         
         <div class="player-main-section">
             <div class="player-avatar-wrapper">
@@ -34,7 +45,7 @@
                 </div>
 
                 <div class="progress-container">
-                    <label><img src="/media/icons/lighting.png" alt="energy" width="24" height="24">: {{ energy }} / 200</label>
+                    <label><img src="/media/icons/lighting.png" alt="energy" width="24" height="24">: {{ energy }} / 200 (+5 / min.)</label>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill energy-color" style="width: calc(({{ energy }} / 200) * 100%)"></div>
                     </div>
@@ -89,18 +100,18 @@
             {% csrf_token %}
 
 
-        <button type="submit" name="drink_type" value="panak" class="button">1 Panák</button>
+        <button type="submit" name="drink_type" value="panak" class="button">1 Panák (50 XP)</button>
         Již vypito: <b>{{ one_player.panak }}</b> panáků
 
         <p></p>
         
 
-        <button type="submit" name="drink_type" value="maly_kelimek" class="button">1 MALÝ kelímek</button>
+        <button type="submit" name="drink_type" value="maly_kelimek" class="button">1 MALÝ kelímek (30 XP)</button>
         Již vypito: <b>{{ one_player.maly_kelimek }}</b> malých kelímků
 
         <p></p>
         
-        <button type="submit" name="drink_type" value="velky_kelimek" class="button">1 VELKÝ kelímek</button>
+        <button type="submit" name="drink_type" value="velky_kelimek" class="button">1 VELKÝ kelímek (40 XP)</button>
         Již vypito: <b>{{ one_player.velky_kelimek }}</b> velkých kelímků
         
         <p></p>

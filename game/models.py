@@ -267,6 +267,12 @@ class achievements(models.Model):
     best_dmg_delt = models.IntegerField(default=0, blank=True)
     total_dmg_taken = models.IntegerField(default=0, blank=True)
     death_counter = models.IntegerField(default=0, blank=True)
+    attack_counter = models.IntegerField(default=0, blank=True)
+    attack_get = models.IntegerField(default=0, blank=True)
+
+    panaky = models.IntegerField(default=0, blank=True)
+    maly_kelimek = models.IntegerField(default=0, blank=True)
+    velky_kelimek = models.IntegerField(default=0, blank=True)
 
 
     def __str__(self):

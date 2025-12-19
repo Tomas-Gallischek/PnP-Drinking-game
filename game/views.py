@@ -5,6 +5,7 @@ from os import error
 import profile
 import re
 import stat
+from typing import ByteString
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
@@ -180,7 +181,7 @@ def quest_generator(request, player_id):
             rarity = 'common'
             rarity_kof = 1
 
-        xp_reward = (30 + (one_player.lvl * 5)) * rarity_kof
+        xp_reward = round((30 + (one_player.lvl * 5)) * rarity_kof)
 
         side_quest_generated.objects.create(
             player=one_player,
@@ -224,13 +225,13 @@ def quest_refresh(request):
         user=request.POST.get('player_id')
         one_player = player.objects.get(id=user)
 
-        if one_player.energie >= 20:
-            one_player.energie -= 20
+        if one_player.energie >= 50:
+            one_player.energie -= 50
             one_player.quest_refresh += 1
             print("HRÁČI BYLY PŘIČTENY REFRESH POINTY")
             one_player.save()
             side_quest_generated.objects.filter(player=one_player).delete()
-            print(f"Hráči bylo odečteno 20 energie za obnovení úkolů. Aktuální energie hráče {one_player.name}: {one_player.energie}")
+            print(f"Hráči bylo odečteno 50 energie za obnovení úkolů. Aktuální energie hráče {one_player.name}: {one_player.energie}")
             quest_generator(request, one_player.id)
             print(f"Hráči {one_player.name} byly obnoveny úkoly.")
 
@@ -251,6 +252,8 @@ def quest_refresh(request):
 
 def drink(request, player_id):
     one_player = player.objects.get(id=player_id)
+    achivements = achievements.objects.get(player__name=one_player.name)
+    
 
     if request.method == 'POST':
         drink_type = request.POST.get('drink_type')
@@ -258,12 +261,18 @@ def drink(request, player_id):
         if drink_type == 'panak':
             one_player.add_xp(50)
             one_player.panak += 1
+            achivements.panaky += 1
+            achivements.save()
         elif drink_type == 'maly_kelimek':
             one_player.add_xp(30)
             one_player.maly_kelimek += 1
+            achivements.maly_kelimek += 1
+            achivements.save()
         elif drink_type == 'velky_kelimek':
             one_player.add_xp(40)
             one_player.velky_kelimek += 1
+            achivements.velky_kelimek += 1
+            achivements.save()
         one_player.save()
 
         return redirect('player_info', player_id=one_player.id)
@@ -276,6 +285,9 @@ def player_info(request, player_id):
     
     one_player = player.objects.get(id=player_id)
     one_player_name = one_player.name
+
+    actual_boss = boss.objects.filter(defeated=False).first()
+    actual_patro = actual_boss.patro
 
     dmg_koef_min = round(one_player.dmg_koef * 0.8, 1)
     dmg_koef_max = round(one_player.dmg_koef * 1.2, 1)
@@ -308,6 +320,7 @@ def player_info(request, player_id):
         'hp_koef_min': hp_koef_min,
         'hp_koef_max': hp_koef_max,
         'energy': energy,
+        'actual_patro': actual_patro,
         
         })
 
@@ -351,6 +364,9 @@ def index(request):
 def reset(request):
     if request.method == 'POST':
         test_start = test_model.objects.first()
+        test_start.test_status = True
+        test_start.save()
+
         test_question = test_start.test_status
         
 
@@ -367,31 +383,28 @@ def reset(request):
             moznosti_povolani = ['mag', 'valecnik', 'hunter']
             povolani = random.choice(moznosti_povolani)
             if povolani == 'mag':
-                dmg = 18
-                # dmg_koef = 9 (původní hodnota)
-                dmg_koef = 25
-                obrana = 2
-                obrana_koef = 1.5
+                dmg = 20
+                dmg_koef = 40
+                obrana = 5
+                obrana_koef = 5
                 hp = 70
-                hp_koef = 50
+                hp_koef = 100
                 role_id = 1
             elif povolani == 'valecnik': 
-                dmg = 12
-                # dmg_koef = 4
-                dmg_koef = 10
-                obrana = 10
-                obrana_koef = 3
+                dmg = 10
+                dmg_koef = 25
+                obrana = 15
+                obrana_koef = 15
                 hp = 120
-                hp_koef = 150
+                hp_koef = 300
                 role_id = 3
             elif povolani == 'hunter':
                 dmg = 14
-                # dmg_koef = 6
-                dmg_koef = 15
-                obrana = 6
-                obrana_koef = 2.5
+                dmg_koef = 33
+                obrana = 10
+                obrana_koef = 10
                 hp = 90
-                hp_koef = 100
+                hp_koef = 200
                 role_id = 2
             else:
                 povolani = 'obycejny clovek'
@@ -404,7 +417,7 @@ def reset(request):
                 role_id = 4
 
 
-            if test_question == True:
+            if test_start.test_status == True:
                 chose_povolani = povolani
             else:
                 chose_povolani = ""
@@ -469,7 +482,9 @@ def reset(request):
             reward_xp = 200
         )
         print("Vytvořen první boss.")
-            
+        
+        test_start.test_status = False
+        test_start.save()
 
     return redirect('index')
 
@@ -573,8 +588,6 @@ def deactive(request):
 def stat_up_test(request, player_id):
     one_player = player.objects.get(id=player_id)
     while one_player.skill_points >= 1:
-        print(f"Zvyšování statů pro hráče {one_player.name}, zbývající skill pointy: {one_player.skill_points}, povolání: {one_player.povolani}")
-
         if one_player.povolani == "mag":
             stat_type = random.choices(
                 ['dmg', 'armor', 'hp'],
@@ -612,3 +625,105 @@ def stat_up_test(request, player_id):
             one_player.skill_points -= 1
             one_player.save()
     
+
+def auto_stats(request):
+    if request.method == 'POST':
+        all_players = player.objects.all()
+        for p in all_players:
+            stat_up_test(request, p.id)
+        return redirect('index')
+    
+
+def decret(request):
+    if request.method == 'POST':
+        player_id = request.POST.get('player_id')
+        one_player = player.objects.get(id=player_id)
+        player_achievements = achievements.objects.get(player=one_player)
+        all_players = player.objects.all()
+
+        total_dmg = player_achievements.total_dmg_delt
+        total_dmg_taken = player_achievements.total_dmg_taken
+        death_counter = player_achievements.death_counter
+        best_dmg_number = player_achievements.best_dmg_delt
+
+        all_achivements = achievements.objects.all().filter(player__active=True)
+
+        all_dmg_delt = all_achivements.order_by('total_dmg_delt').reverse()
+        rank_dmg = 1
+        for one in all_dmg_delt:
+            if one.player == one_player:
+                rank_dmg = rank_dmg
+                break
+            else:
+                rank_dmg += 1
+                print(f"Rank dmg: {rank_dmg}")
+
+        all_dmg_taken = all_achivements.order_by('total_dmg_taken').reverse()
+        rank_dmg_taken = 1
+        for one in all_dmg_taken:
+            if one.player == one_player:
+                rank_dmg_taken = rank_dmg_taken
+                break
+            else:
+                rank_dmg_taken += 1
+                print(f"Rank dmg taken: {rank_dmg_taken}")
+
+        total_deads = all_achivements.order_by('death_counter')
+        rank_deads = 1
+        for one in total_deads:
+            if one.player == one_player:
+                rank_deads = rank_deads
+                break
+            else:
+                rank_deads += 1
+                print(f"Rank deads: {rank_deads}")
+
+        best_dmg = all_achivements.order_by('best_dmg_delt').reverse()
+        rank_best_dmg = 1
+        for one in best_dmg:
+            if one.player == one_player:
+                rank_best_dmg = rank_best_dmg
+                break
+            else:
+                rank_best_dmg += 1
+                print(f"Rank best dmg: {rank_best_dmg}")
+
+        all_player_score = all_players.order_by('score').reverse()
+        total_rank = 1
+
+        for one in all_player_score:
+            if one.name == one_player.name:
+                total_rank = total_rank
+                break
+            else:
+                total_rank += 1
+                print(f"Rank best dmg: {total_rank}")
+
+        total_attack_delt = player_achievements.attack_counter
+        total_attack_taken = player_achievements.attack_get
+
+        panaky = player_achievements.panaky
+        maly_kelimek = player_achievements.maly_kelimek
+        velky_kelimek = player_achievements.velky_kelimek
+
+        return render(request, 'game/dekret.html', context={
+            'one_player': one_player,
+            'achievements': player_achievements,
+            'total_dmg': total_dmg,
+            'total_dmg_taken': total_dmg_taken,
+            'death_counter': death_counter,
+            'best_dmg': best_dmg_number,
+
+            'rank_deads': rank_deads,
+            'rank_dmg': rank_dmg,
+            'rank_dmg_taken': rank_dmg_taken,
+            'rank_best_dmg': rank_best_dmg,
+            'total_rank': total_rank,
+            'total_attack_delt': total_attack_delt,
+            'total_attack_taken': total_attack_taken,
+
+            'panaky': panaky,
+            'maly_kelimek': maly_kelimek,
+            'velky_kelimek': velky_kelimek,
+
+        })
