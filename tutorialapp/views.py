@@ -14,7 +14,7 @@ def tut_end(request):
 
         if povolani == 'mag':
             dmg = 20
-            dmg_koef = 40
+            dmg_koef = 43
             obrana = 5
             obrana_koef = 5
             hp = 70
@@ -30,7 +30,7 @@ def tut_end(request):
             role_id = 3
         elif povolani == 'hunter':
             dmg = 14
-            dmg_koef = 33
+            dmg_koef = 32
             obrana = 10
             obrana_koef = 10
             hp = 90

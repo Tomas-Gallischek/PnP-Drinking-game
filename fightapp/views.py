@@ -203,7 +203,7 @@ def fight(request):
         next_patro = patro + 1
         next_boss_info = boss_names_descriptions.objects.get(patro=next_patro)
         next_lvl = actual_boss.lvl + 1
-        next_reward = actual_boss.reward_xp * 1.1
+        next_reward = round(actual_boss.reward_xp * 1.1)
         hraci = pocet_hracu.objects.first()
         pocet_hracu_now = hraci.pocet_hracu_now
         print("Počet hráčů nyní:", pocet_hracu_now)
@@ -221,13 +221,21 @@ def fight(request):
             defeated = False,
             lvl = next_lvl,
 
-            dmg = (((hraci.all_players_dmg) / pocet_hracu_now) / 4) + (actual_boss.dmg),
-            armor = (((hraci.all_players_armor) / pocet_hracu_now) / 10) + (actual_boss.armor),
-            hp = (((hraci.all_player_hp) / pocet_hracu_now) / 3) + (actual_boss.hp),
+            dmg = round((((hraci.all_players_dmg) / pocet_hracu_now) * 0.1 ) + ((actual_boss.dmg) * 1.1)),
+            armor = round((((hraci.all_players_armor) / pocet_hracu_now) * 0.05 ) + ((actual_boss.armor) * 1.1)),
+            hp = round((((hraci.all_player_hp) / pocet_hracu_now) * 0.1) + ((actual_boss.hp) * 1.1)),
 
             reward_xp = round(next_reward)
         )
-        print(f"Nový boss: {next_boss_info.name} Patro: {next_patro} Level: {next_lvl} Reward XP: {next_reward}"),
+        print("nový BOSS vytbořen:")
+        print("Patro:", next_patro)
+        print("Jméno:", next_boss_info.name)
+        print("Úroveň:", next_lvl)
+        print("DMG:", round((((hraci.all_players_dmg) / pocet_hracu_now) * 0.15 ) + ((actual_boss.dmg) * 1.1)))
+        print("Armor:", round((((hraci.all_players_armor) / pocet_hracu_now) * 0.1 ) + ((actual_boss.armor) * 1.1)))
+        print("HP:", round((((hraci.all_player_hp) / pocet_hracu_now) * 0.2) + ((actual_boss.hp) * 1.1)))
+        print("Odměna XP:", round(next_reward))
+
     
 
 

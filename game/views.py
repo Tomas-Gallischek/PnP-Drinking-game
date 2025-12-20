@@ -384,7 +384,7 @@ def reset(request):
             povolani = random.choice(moznosti_povolani)
             if povolani == 'mag':
                 dmg = 20
-                dmg_koef = 40
+                dmg_koef = 43
                 obrana = 5
                 obrana_koef = 5
                 hp = 70
@@ -400,7 +400,7 @@ def reset(request):
                 role_id = 3
             elif povolani == 'hunter':
                 dmg = 14
-                dmg_koef = 33
+                dmg_koef = 32
                 obrana = 10
                 obrana_koef = 10
                 hp = 90
@@ -469,6 +469,8 @@ def reset(request):
         
         
         first_boss = boss_names_descriptions.objects.get(patro=1)
+
+    #první boss se vygeneruje dynamicky podle počtu hráčů, jinak by byl stejný pro 5 i 15 hráčů
         boss.objects.create(
             name = first_boss.name,
             boss_img = first_boss.boss_img,
@@ -476,9 +478,9 @@ def reset(request):
             description = first_boss.description,
             defeated = False,
             lvl = 1,
-            dmg = 15,
-            armor = 5,
-            hp = 200,
+            dmg = pocet,
+            armor = round(pocet / 3),
+            hp = round(13 * pocet),
             reward_xp = 200
         )
         print("Vytvořen první boss.")
@@ -591,13 +593,13 @@ def stat_up_test(request, player_id):
         if one_player.povolani == "mag":
             stat_type = random.choices(
                 ['dmg', 'armor', 'hp'],
-                weights=[0.6, 0.1, 0.3],
+                weights=[0.5, 0.2, 0.3],
                 k=1
             )[0]
         elif one_player.povolani == "valecnik":
             stat_type = random.choices(
                 ['dmg', 'armor', 'hp'],
-                weights=[0.2, 0.4, 0.4],
+                weights=[0.3, 0.3, 0.4],
                 k=1
             )[0]
         elif one_player.povolani == "hunter":
@@ -706,6 +708,18 @@ def decret(request):
         maly_kelimek = player_achievements.maly_kelimek
         velky_kelimek = player_achievements.velky_kelimek
 
+
+        player_quests = side_quest.objects.filter(player=one_player, done=True)
+
+        total_quests = player_quests.count()
+
+        common_quests = player_quests.filter(rarity='common').count()
+        uncommon_quests = player_quests.filter(rarity='uncommon').count()
+        rare_quests = player_quests.filter(rarity='rare').count()
+        epic_quests = player_quests.filter(rarity='epic').count()
+        legendary_quests = player_quests.filter(rarity='legendary').count()
+        
+
         return render(request, 'game/dekret.html', context={
             'one_player': one_player,
             'achievements': player_achievements,
@@ -725,5 +739,12 @@ def decret(request):
             'panaky': panaky,
             'maly_kelimek': maly_kelimek,
             'velky_kelimek': velky_kelimek,
+
+            'total_quests': total_quests,
+            'common_quests': common_quests,
+            'uncommon_quests': uncommon_quests,
+            'rare_quests': rare_quests,
+            'epic_quests': epic_quests,
+            'legendary_quests': legendary_quests,
 
         })

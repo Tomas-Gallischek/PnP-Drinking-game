@@ -145,7 +145,7 @@ class player(models.Model):
             xp -= xp_need
             self.xp = xp
             self.lvl += 1
-            self.xp_need = int(round((xp_need + 50)))
+            self.xp_need = int(round((xp_need + 40)))
 
             print(Fore.LIGHTCYAN_EX + f"{self.name} level up to {self.lvl}!" + Style.RESET_ALL)
 
