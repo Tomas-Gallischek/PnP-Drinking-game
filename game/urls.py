@@ -19,5 +19,7 @@ urlpatterns = [
     path('quest_refresh', views.quest_refresh, name='quest_refresh'),
     path('auto_stats', views.auto_stats, name='auto_stats'),
     path('decret', views.decret, name='decret'),
+    path('skill_reset/<int:player_id>/', views.skill_reset, name='skill_reset'),
+    path('napoveda', views.napoveda, name='napoveda'),
 
 ]

@@ -1,4 +1,5 @@
 from hmac import new
+from logging import critical
 from math import e
 from multiprocessing import context
 from os import error
@@ -101,6 +102,10 @@ def take_quest(request):
     if request.method == 'POST':
         user=request.POST.get('player_id') or None
         user_coop = request.POST.get('coop_player_id') or None
+        random_coop = request.POST.get('random_coop_player') or None
+        if random_coop == '1' or random_coop == 1:
+            all_active_players = player.objects.filter(active=True).exclude(id=user)
+            user_coop = random.choice(all_active_players).id if all_active_players.exists() else None
         one_player = player.objects.get(id=user)
         coop_player = player.objects.get(id=user_coop) if user_coop else None 
         print(f"Quest pro hráče: {user}, coop hráč: {user_coop}")
@@ -164,24 +169,24 @@ def quest_generator(request, player_id):
         
         if rarity_roll >= 20:
             rarity = 'legendary'
-            rarity_kof = 2
+            rarity_kof = 3
         elif rarity_roll >= 16:
             rarity = 'epic'
-            rarity_kof = 1.8
+            rarity_kof = 2.6
         elif rarity_roll >= 12:
             rarity = 'rare'
-            rarity_kof = 1.6
+            rarity_kof = 2.2
         elif rarity_roll >= 8:
             rarity = 'uncommon'
-            rarity_kof = 1.4
+            rarity_kof = 1.8
         elif rarity_roll >= 4:
             rarity = 'common'
-            rarity_kof = 1.2
+            rarity_kof = 1.4
         else:
             rarity = 'common'
             rarity_kof = 1
 
-        xp_reward = round((30 + (one_player.lvl * 5)) * rarity_kof)
+        xp_reward = round((50 + (one_player.lvl * 10)) * rarity_kof)
 
         side_quest_generated.objects.create(
             player=one_player,
@@ -478,10 +483,14 @@ def reset(request):
             description = first_boss.description,
             defeated = False,
             lvl = 1,
-            dmg = pocet,
+            dmg = pocet * 2,
             armor = round(pocet / 3),
-            hp = round(13 * pocet),
-            reward_xp = 200
+            hp = round(20 * pocet),
+
+            critic_chance = 1.5,
+            dodge_chance = 1.5,
+            
+            reward_xp = 100
         )
         print("Vytvořen první boss.")
         
@@ -748,3 +757,24 @@ def decret(request):
             'legendary_quests': legendary_quests,
 
         })
+    
+def skill_reset(request, player_id):
+    if request.method == 'POST':
+        one_player = player.objects.get(id=player_id)
+        if one_player.energie >= 200:
+            one_player.energie -= 200
+            one_player.skill_points = one_player.lvl * 3
+
+            one_player.dmg_now = one_player.dmg + (one_player.lvl * one_player.dmg_koef)
+            one_player.armor_now = one_player.armor + (one_player.lvl * one_player.armor_koef)
+            one_player.hp_now = one_player.hp + (one_player.lvl * one_player.hp_koef)
+            one_player.hp_actual_fight = one_player.hp + (one_player.lvl * one_player.hp_koef)  
+
+            one_player.save()
+
+        return redirect('player_info', player_id=one_player.id)
+    else:
+        return redirect('player_info', player_id=one_player.id)
+    
+def napoveda(request):
+    return render(request, 'game/napoveda.html')

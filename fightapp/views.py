@@ -41,15 +41,21 @@ def fight(request):
         # Ostatní statistiky a výsledek budou nastaveny na konci boje
     )
     turn_counter = 1
+    dmg_round_bonus = 1.01
     total_player_dmg = 0
     total_boss_dmg = 0
     # -------------------------------
 
-    players_iniciative = random.randint(1, 100)
-    boss_iniciative = random.randint(1, 100)
+
 
     while boss_hp > 0 and any(p.hp_actual_fight > 0 for p in players):
         
+
+        players_iniciative = random.randint(1, 100)
+        boss_iniciative = random.randint(1, 100)
+
+        dmg_round_bonus += 0.02 # Postupné zvyšování bonusového poškození každým kolem
+
         # Hodnoty, které se dynamicky mění v rámci TAHU (pro výpočet brnění/DMG roll)
         current_boss_armor = boss_armor_base
         current_boss_dmg = boss_dmg_base
@@ -62,11 +68,31 @@ def fight(request):
             if not live_players.exists():
                 break # Všichni hráči jsou mrtví, konec boje
                 
-            current_player = random.choice(live_players) 
+            current_player = random.choice(live_players)
+
+            # Zjištění kritického zásahu:
+            critic_chance = current_player.critic_chance 
+            critic_roll = random.uniform(0, 100)
+            if critic_chance >= critic_roll:
+                critic_status = True
+                critic_dmg_bonus = 2
+            else:
+                critic_status = False
+                critic_dmg_bonus = 1
+
+            # Zjištění bojového postoje:
+            doge_chance = actual_boss.dodge_chance
+            dodge_roll = random.uniform(0, 100)
+            if doge_chance >= dodge_roll:
+                bojovy_postoj_status = True
+                bojovy_postoj_bonus = 2
+            else:
+                bojovy_postoj_status = False
+                bojovy_postoj_bonus = 1
 
             # Výpočet poškození hráče a brnění bosse s rozptylem
-            current_player_dmg_roll = round(current_player.dmg_now * (random.uniform(0.8, 1.2)))
-            boss_armor_roll = round(current_boss_armor * (random.uniform(0.9, 1.1)))
+            current_player_dmg_roll = round(((current_player.dmg_now * (random.uniform(0.8, 1.2))) * dmg_round_bonus) * critic_dmg_bonus)
+            boss_armor_roll = round((current_boss_armor * (random.uniform(0.9, 1.1))) * bojovy_postoj_bonus)
             dmg_delt = current_player_dmg_roll - boss_armor_roll
 
             if dmg_delt < 0:
@@ -91,6 +117,9 @@ def fight(request):
                 boss_hp_after=max(0, boss_hp), # Ujistíme se, že HP není záporné
                 target_player_hp_after=current_player.hp_actual_fight, # HP hráče se nemění, ale zaznamenáme aktuální
                 target_player_max_hp=current_player.hp_now,
+
+                critic_status=critic_status,
+                bojovy_postoj_status=bojovy_postoj_status,
             )
             # Konec záznamu tahu hráče
 
@@ -119,9 +148,33 @@ def fight(request):
                 
             target_player = random.choice(live_players) 
 
+            # Zjištění kritického zásahu:
+            boss_critic_chance = actual_boss.critic_chance 
+            boss_critic_roll = random.uniform(0, 100)
+
+            if boss_critic_chance >= boss_critic_roll:
+                critic_status = True
+                critic_dmg_bonus = 2
+            else:
+                critic_status = False
+                critic_dmg_bonus = 1
+
+            # Zjištění bojového postoje:
+            dodge_chance = target_player.dodge_chance
+            dodge_roll = random.uniform(0, 100)
+            if dodge_chance >= dodge_roll:
+                bojovy_postoj_status = True
+                bojovy_postoj_bonus = 2
+            else:
+                bojovy_postoj_status = False
+                bojovy_postoj_bonus = 1
+
+
+
             # Výpočet poškození bosse a brnění hráče s rozptylem
-            boss_dmg_roll = round(current_boss_dmg * (random.uniform(0.8, 1.2)))
-            target_player_armor_roll = round(target_player.armor_now * (random.uniform(0.9, 1.1))) 
+            boss_dmg_roll = round(((current_boss_dmg * (random.uniform(0.8, 1.2))) * dmg_round_bonus) * critic_dmg_bonus)
+            target_player_armor_roll = round((target_player.armor_now * (random.uniform(0.9, 1.1))) * bojovy_postoj_bonus) 
+
             dmg_delt = boss_dmg_roll - target_player_armor_roll
             
             if dmg_delt < 0:
@@ -152,6 +205,9 @@ def fight(request):
                 boss_max_hp=actual_boss.hp,
                 target_player_hp_after=max(0, target_player.hp_actual_fight),
                 target_player_max_hp=target_player.hp_now,
+
+                critic_status=critic_status,
+                bojovy_postoj_status=bojovy_postoj_status,
             )
             # Konec záznamu tahu bosse
             
@@ -203,7 +259,7 @@ def fight(request):
         next_patro = patro + 1
         next_boss_info = boss_names_descriptions.objects.get(patro=next_patro)
         next_lvl = actual_boss.lvl + 1
-        next_reward = round(actual_boss.reward_xp * 1.1)
+        next_reward = round(actual_boss.reward_xp * 1.15)
         hraci = pocet_hracu.objects.first()
         pocet_hracu_now = hraci.pocet_hracu_now
         print("Počet hráčů nyní:", pocet_hracu_now)
@@ -213,6 +269,7 @@ def fight(request):
             p.add_xp(actual_boss.reward_xp)
             p.save()
 
+
         boss.objects.create(
             name = next_boss_info.name,
             patro = next_patro,
@@ -221,9 +278,12 @@ def fight(request):
             defeated = False,
             lvl = next_lvl,
 
-            dmg = round((((hraci.all_players_dmg) / pocet_hracu_now) * 0.1 ) + ((actual_boss.dmg) * 1.1)),
-            armor = round((((hraci.all_players_armor) / pocet_hracu_now) * 0.05 ) + ((actual_boss.armor) * 1.1)),
-            hp = round((((hraci.all_player_hp) / pocet_hracu_now) * 0.1) + ((actual_boss.hp) * 1.1)),
+            dmg = round(hraci.all_players_dmg / pocet_hracu_now) * 1.15,
+            armor = round(hraci.all_players_armor / pocet_hracu_now) * 0.9,
+            hp = round(hraci.all_player_hp * 0.9),
+
+            critic_chance = actual_boss.lvl * 1.5,
+            dodge_chance = actual_boss.lvl * 1.5,
 
             reward_xp = round(next_reward)
         )

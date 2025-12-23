@@ -25,6 +25,9 @@ class boss(models.Model):
     armor = models.IntegerField(default=1)
     hp = models.IntegerField(default=10)
 
+    critic_chance = models.FloatField(default=1, blank=True, null=True)  # šance na kritický zásah
+    dodge_chance = models.FloatField(default=1, blank=True, null=True)  # šance na vyšší obranu
+
     reward_xp = models.IntegerField(default=10)
 
     def __str__(self):
@@ -78,6 +81,9 @@ class TurnLog(models.Model):
 
     target_player_hp_after = models.IntegerField(null=True, blank=True, verbose_name="HP Hráče po tahu")
     target_player_max_hp = models.IntegerField(null=True, blank=True, verbose_name="Maximální HP Hráče")
+
+    critic_status = models.BooleanField(verbose_name="Stav kritického zásahu", default=False, blank=True, null=True)
+    bojovy_postoj_status = models.BooleanField(verbose_name="Stav bojového postoje", default=False, blank=True, null=True)
 
     def __str__(self):
         return f"Tah {self.turn_number} v boji {self.fight_id}"

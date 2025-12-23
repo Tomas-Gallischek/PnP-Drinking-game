@@ -114,7 +114,10 @@ class player(models.Model):
     hp_now = models.FloatField(blank=True, default=1)
     hp_actual_fight = models.IntegerField(blank=True, default=1)
 
+    critic_chance = models.FloatField(default=1, blank=True, null=True)  # šance na kritický zásah
+    dodge_chance = models.FloatField(default=1, blank=True, null=True)  # šance na vyšší obranu
 
+    
     def energy_change(self):
         if self.energie <= 200:
             time_now = timezone.now()
@@ -149,7 +152,34 @@ class player(models.Model):
 
             print(Fore.LIGHTCYAN_EX + f"{self.name} level up to {self.lvl}!" + Style.RESET_ALL)
 
+    # ABY SE POSTAVY VYLEPŠOVALY I LEVELEM TROCHU
+            if self.povolani == 'mag':
+                self.hp_now += self.hp_koef
+                self.dmg_now += self.dmg_koef
+                self.armor_now += self.armor_koef
+            elif self.povolani == 'hunter':
+                self.hp_now += self.hp_koef
+                self.dmg_now += self.dmg_koef
+                self.armor_now += self.armor_koef
+            elif self.povolani == 'valecnik':
+                self.hp_now += self.hp_koef
+                self.dmg_now += self.dmg_koef
+                self.armor_now += self.armor_koef
+
             self.skill_points += 3
+
+            if self.povolani == 'mag':
+                critic_koef = 2
+                dodge_koef = 1
+            elif self.povolani == 'hunter':
+                critic_koef = 1.5
+                dodge_koef = 1.5
+            elif self.povolani == 'valecnik':
+                critic_koef = 1
+                dodge_koef = 2
+
+            self.critic_chance = self.lvl * critic_koef
+            self.dodge_chance = self.lvl * dodge_koef
             self.save()
             
             self.lvl_up()  # Rekurzivní volání pro případ, že hráč získal více úrovní najednou

@@ -53,6 +53,7 @@
 
                 <div class="skill-points-highlight">
                     Dostupné skill pointy: <b>{{ one_player.skill_points }} <img src="/media/icons/skill_point.png" alt="skill_point" width="25" height="25" center:"center"></b>
+                    <form action="{% url 'skill_reset' one_player.id %}" method="post"> {% csrf_token %} <button type="submit" class="button">Resetovat staty (200 energie) </button></form>
                 </div>
             </div>
         </div>

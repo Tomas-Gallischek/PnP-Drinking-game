@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Nápověda{% endblock title %}
+
+{% block content %}
+<h1>Nápověda:</h1>
+
+<h3><b><u>Obecně:</u></b></h3>
+<p>
+    Cílem této hry je porazit všech 25 bossů země "MEMELANDIA". Každý z bosů je inspirován jedním meme za každý rok od 2000 do 2025
+</p>
+
+<p>
+    Hráči navíc mohou své výsledky porovnávat v Síni slávy a soutěži tak o to, kdo je nejlepší bojovník.
+</p>
+
+<h3><b><u>Postavy:</u></b></h3>
+<p>
+    Háči mohou hrát za 3 typy postav. Mág, Válečník a Hunter kdy každá z postav má své pro a proti. <u>Mág</u> má zaručeně největší poškození ze hry ale v soubojích moc dlouho nevydrží a spoléha na to že udělí ránu dřív než soupeř. <u>Válečník</u> Má naopak hodně obrany a hodně životů, vydrží tedy několikanásobně tolik co kouzelník, ale jeho poškození není valné. <u>Hunter</u> je něco mezi tím, má slušné poškození a slušnou obranu, ale nic z toho není nijak extrémní.
+</p>
+
+<p>
+    Jelikož se jedná o týmovou hru, je třeba nad postavami přemýštet strategicky. <u>Mágové</u> jsou zpravidla ti, kdo bosse umlátí, ale potřebujou <u>válečníky</u>, kteří dokáží ustát rány bosse. Rány, které dokáže ustát jediný válečníl by dokázaly zabít hned několik mágů. <u>Hunter</u> je opět zlatá střední cesta.
+</p>
+
+<h3><b><u>Vylepšování postav:</u></b></h3>
+<p>
+    Hráči získávají zkušenosti tím, jak si užívají silvestrovský večer. Mohou buď expit pitím alkoholických nápojů nebo plněním nejrůznějších výzev solo i s parťákem. 
+</p>
+
+<p>
+    Další zkušenosti pak hráči získávají porážení bossů v dungeonech.
+</p>
+
+<p>
+    Za každý lvl se hráči zvednou jeho staty podle toho, jakou postavu hraje + dostane další 3 <u>"skill pointy</u> které si může libovolně mezi staty rozdělit a zvolit si tak svojí unikátní strategii
+</p>
+
+<h3><b><u>Questy:</u></b></h3>
+<p>
+    Hráči mohou během večera příjmout nejrůznější qeusty, které se dělí do 3 kategorií: Picí, challange a coop. V picích questech jde z pravidla o to vypít nějaký alkohol za nějakých podmínek. V challange questech jde o nějkou výzvu nebo úkol, který musí hráč splnit a v coop musí hráč soutěžit s jiným hráčem. U coom questů platí, že musí oba hráči s questem souhlasit. 
+</p>
+
+<p>
+    Questy dále mohou mít různou hodnotu (common, uncommon, rare, epic a legendary) která určuje, kolik zkušeností hráč za splnění questu získá. Čím vyšší hodnota, tím více zkušeností a taky čím vyšší lvl hráče tí mvětší šance na lepší questy.
+</p>
+
+<h3><b><u>Souboje:</u></b></h3>
+
+<p>
+    Souboje jsou tahové, kdy se na začátku každého kola vyhodnotí, jestli zaútočí BOSS nebo HRÁČ (50% / 50%). Pokud útočí BOSS, vybere si navíc <u><b>NÁHODNÉ HRÁČE</b></u> na kterého zaútočí. 
+</p>
+
+<p>
+    HODNOTA ÚTOKU = Poškození postavy (to co je na profilu) * (náhodné číslo od 0.8 do 1.2) - Tedy odchylka +- 20%
+</p>
+
+<p>
+    HODNOTA OBRANY = Obrana postavy (to co je na profilu) * (náhodné číslo od 0.9 do 1.1) - Tedy odchylka +- 10%
+</p>
+
+<p>
+    Výsledné poškození se pak počítá jako HODNOTA ÚTOKU - HODNOTA OBRANY = UBRANÉ ŽIVOTY
+</p>
+
+<h3><b><u>Dungeony:</u></b></h3>
+
+<p>
+    V dungeonech se postupně utkáte s 25 bossy, kdy každ ýreprezentuje jeden MEME od roku 2000 do roku 2025. 
+</p>
+
+<p>
+    <b><u>POZOR !!!</u></b> - Každý boss se generuje až po poražení toho předešlého a <u>generuje se částečně na základě vašich aktuálních statů</u>. V praxi to znamená že vám nepomůže, že se prvně vylepšíte a pak porazíte všechny najednou, protože takto budou bossové akorát výrazně silnější. (důvodem tohoto systému je jednodušší balanc hry)
+</p>
+
+<p>
+    Za poražení každého bosse dostanete všichni výrazné množství zkušeností.
+</p>
+
+<p>
+    Aby nedocházelo k "nekonečným soubojům" je hra nastavená tak, že po každém kole se poškození všech zvýší o 1% na obou stranách. 
+</p>
+
+<h3><b><u>Síň slávy:</u></b></h3>
+
+<p>
+    Hodnotící systém celé hry. Všichni se můžete mezi sebou porovnávat ve žebříčcích (tzv. Řádech) a získávat body za úmístění. Tyto bofy se pak sčítají v celkovém (pátem) žebříčku.
+</p>
+
+<p>
+    Body se rozdělují podle toho, kolik procent z dané statistiky hráč pokrývá. Například:. Pokud všichni hráči dohromady udělili 1 000 000 a daný hráč udělal 100 000, tak pokrývá 10 % z celkového poškození a získá tak 10% z celkem 1000 bodů. Toto číslo se pak přičte k základu 800.
+</p>
+
+<p>
+    <U>VÝSLEDNÝ VZORECH: Skore = 800 + (0.1 * 1000) = 900b</U>
+</p>
+
+<h3><u><b>ŘÁD Berserka:</b></u></h3>
+<p>
+    Největší CELKOVÉ poškození
+</p>
+
+<h3><u><b>ŘÁD Kolosa:</b></u></h3>
+<p>
+    Největší UTANKOVANÉ poškození (počítá se pouze poškození "vykryté" armorem)
+</p>
+
+<h3><u><b>ŘÁD Nekromanta:</b></u></h3>
+<p>
+    Počet smrtí (nejmenší = nejlepší)
+</p>
+
+<h3><u><b>ŘÁD Asasina:</b></u></h3>
+
+<p>
+    Nejvyšší JEDNORÁZOVÉ poškození
+</p>
+
+<p>
+    ... PS: ... Pokud něco nevíte nebo vás zajmá, zeptejte se Shreka xD
+</p>
+
+
+
+
+
+
+{% endblock content%}

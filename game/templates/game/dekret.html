@@ -3,44 +3,116 @@
 
 {% block title %}Hrdinský dekret{% endblock %}
 
+{% block styly %}
+    <link rel="stylesheet" href="{% static 'game/dekret.css' %}">
+{% endblock styly %}
+
 {% block content %}
 
-<h1>Hrdinský GLEJT</h1>
+<div class="dekret-wrapper">
+    <div class="dekret-card" id="capture-area">
+        
+        <header class="dekret-header">
+            <h1 class="dekret-title">Hrdinský GLEJT</h1>
+            <div class="dekret-player-name">{{ one_player.name }} (Lvl: {{ one_player.lvl }})</div>
+            <div class="dekret-total-rank">
+                <span class="label">Celkové pořadí</span>
+                <span class="value">{{ total_rank }}</span>
+            </div>
+        </header>
 
-<h2>Úspěchy hráče: {{ one_player.name }}</h2>
+        <section class="dekret-section ranks-section">
+            <div class="rank-badge" title="Řád Berserka">
+                <span class="rank-icon">⚔️</span>
+                <div class="rank-info">
+                    <span class="rank-name">Berserk</span>
+                    <span class="rank-value">{{ rank_dmg }}</span>
+                </div>
+            </div>
+            <div class="rank-badge" title="Řád Kolosa">
+                <span class="rank-icon">🛡️</span>
+                <div class="rank-info">
+                    <span class="rank-name">Kolos</span>
+                    <span class="rank-value">{{ rank_dmg_taken }}</span>
+                </div>
+            </div>
+            <div class="rank-badge" title="Řád Nekromanta">
+                <span class="rank-icon">💀</span>
+                <div class="rank-info">
+                    <span class="rank-name">Nekromant</span>
+                    <span class="rank-value">{{ rank_deads }}</span>
+                </div>
+            </div>
+            <div class="rank-badge" title="Řád Asasina">
+                <span class="rank-icon">🗡️</span>
+                <div class="rank-info">
+                    <span class="rank-name">Asasin</span>
+                    <span class="rank-value">{{ rank_best_dmg }}</span>
+                </div>
+            </div>
+        </section>
 
+        <hr class="dekret-divider">
 
-<h3>Celkové poškození: </h3> <h2>{{ total_dmg }}</h2>
+        <section class="dekret-section stats-grid">
+            <div class="stat-box">
+                <span class="stat-label">Poškození</span>
+                <span class="stat-value text-gold">{{ total_dmg }}</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Nejsilnější rána</span>
+                <span class="stat-value text-red">{{ best_dmg }}</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Vyblokováno</span>
+                <span class="stat-value text-blue">{{ total_dmg_taken }}</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Smrti</span>
+                <span class="stat-value text-grey">{{ death_counter }}</span>
+            </div>
+            <div class="stat-box full-width">
+                <span class="stat-label">Útoky (Rozdané / Přijaté)</span>
+                <span class="stat-value">{{ total_attack_delt }} / {{ total_attack_taken }}</span>
+            </div>
+        </section>
 
-<h3>Nejsilnější rána: </h3> <h2>{{ best_dmg }}</h2>
+        <hr class="dekret-divider">
 
-<h3>Celkové vyblokované poškození: </h3> <h2>{{ total_dmg_taken }}</h2>
+        <section class="dekret-section drink-section">
+            <h3>Pitný režim</h3>
+            <div class="drink-grid">
+                <div class="drink-item">
+                    <span class="drink-icon">🥃</span>
+                    <span class="drink-count">{{ panaky }}</span>
+                    <span class="drink-name">Panáky</span>
+                </div>
+                <div class="drink-item">
+                    <span class="drink-icon">🥤</span>
+                    <span class="drink-count">{{ maly_kelimek }}</span>
+                    <span class="drink-name">Malé</span>
+                </div>
+                <div class="drink-item">
+                    <span class="drink-icon">🍺</span>
+                    <span class="drink-count">{{ velky_kelimek }}</span>
+                    <span class="drink-name">Velké</span>
+                </div>
+            </div>
+        </section>
 
-<h3>Počet úmrtí: </h3> <h2>{{ death_counter }}</h2>
+        <footer class="dekret-footer">
+            <h3>Splněné Questy: {{ total_quests }}</h3>
+            <div class="quest-rarities">
+                <span class="q-common">Common: {{ common_quests }}</span> •
+                <span class="q-uncommon">Uncommon: {{ uncommon_quests }}</span> •
+                <span class="q-rare">Rare: {{ rare_quests }}</span> •
+                <span class="q-epic">Epic: {{ epic_quests }}</span> •
+                <span class="q-legendary">Legendary: {{ legendary_quests }}</span>
+            </div>
+        </footer>
+        
+        <div class="watermark">PnP Drinking Game</div>
+    </div>
+</div>
 
-<h3>Počet útoků: </h3> <h2>{{ total_attack_delt }}</h2>
-
-<h3>Počet obdržených ran: </h3> <h2>{{ total_attack_taken }}</h2>
-
-<h3>ŘÁD Berserka:</h3> <h2>{{rank_dmg}}</h2>
-<h3>ŘÁD Kolosa:</h3> <h2>{{rank_dmg_taken}}</h2>
-<h3>ŘÁD Nekromanta:</h3> <h2>{{rank_deads}}</h2>
-<h3>ŘÁD Asasina:</h3> <h2>{{rank_best_dmg}}</h2>
-
-<h2>Celkové pořadí hráče: {{ total_rank }}</h2>
-
-
-<h2>Počet vypitých drinků:</h2>
-<h3>Panáků: </h3> <h2>{{ panaky }}</h2>
-<h3>Malých kelímků: </h3> <h2>{{ maly_kelimek }}</h2>
-<h3>Velkých kelímků: </h3> <h2>{{ velky_kelimek }}</h2>
-
-<h2>Questy:</h2>
-<h3>Common: </h3> <h2>{{ common_quests }}</h2>
-<h3>Uncommon: </h3> <h2>{{ uncommon_quests }}</h2>
-<h3>Rare: </h3> <h2>{{ rare_quests }}</h2>
-<h3>Epic: </h3> <h2>{{ epic_quests }}</h2>
-<h3>Legendary: </h3> <h2>{{ legendary_quests }}</h2>
-
-<h3>Celkem splněných questů: </h3> <h2>{{ total_quests }}</h2>
-{% endblock  %}
+{% endblock %}
