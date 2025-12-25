@@ -169,111 +169,44 @@
     margin-right: 2px;
 }
 
-/* Responzivita pro menší obrazovky */
 @media (max-width: 768px) {
+    /* Hlavní sekce pod sebe */
     .player-main-section {
         flex-direction: column;
-        text-align: center;
+        gap: 20px;
+        padding: 15px; /* Menší padding */
     }
-    
+
+    /* Profilovka menší na mobilu */
+    .player-avatar-container {
+        width: 150px;
+        height: 150px;
+    }
+
+    /* Mřížka statistik - na mobilu 3 vedle sebe je moc, dáme je pod sebe */
     .stats-grid {
-        grid-template-columns: 1fr;
+        display: flex;      /* Změna z gridu na flex pro lepší kontrolu */
+        flex-direction: column;
+        gap: 15px;
     }
-}
 
-/* --- KONTEJNER --- */
-.glejt {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem 0;
-    animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; /* Efektní přílet */
-}
-
-/* --- TLAČÍTKO GLEJTU --- */
-.decret-button {
-    position: relative; /* Důležité pro efekty uvnitř */
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    color: #3e2723; /* Tmavě hnědá (vypadá dobře na zlaté) */
+    /* Karty statistik */
+    .stat-card {
+        flex-direction: row; /* Ikonka vlevo, tlačítko vpravo */
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+    }
     
-    /* Zlatý gradient */
-    background: linear-gradient(to bottom, #ffe082 0%, #f1c40f 50%, #b7950b 100%);
-    
-    padding: 15px 40px;
-    border: 3px solid #fff; /* Bílý rámeček */
-    border-radius: 50px; /* Kulaté rohy */
-    cursor: pointer;
-    overflow: hidden; /* Aby odlesk nevyjížděl ven */
-    transition: transform 0.2s, box-shadow 0.2s;
-    
-    /* Vnější záře (Svit) */
-    box-shadow: 
-        0 0 20px rgba(241, 196, 15, 0.6), 
-        inset 0 0 10px rgba(255, 255, 255, 0.5);
-    
-    /* Animace pulzování */
-    animation: legendary-pulse 2s infinite ease-in-out;
-}
+    .stat-label {
+        font-size: 1.1rem;
+        margin-bottom: 0; /* Zrušení marginu, když jsou vedle sebe */
+        text-align: left;
+    }
 
-/* Vnitřní text - zvýraznění */
-.decret-button b {
-    display: block;
-    font-size: 1.8rem;
-    color: #2c3e50;
-    text-shadow: 0px 1px 0px rgba(255,255,255,0.4);
-}
-
-/* --- EFEKT ODLESKU (PŘELET SVĚTLA) --- */
-.decret-button::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    
-    /* Šikmý pruh světla */
-    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
-    transform: skewX(-25deg);
-    
-    /* Animace přeletu */
-    animation: shine-sweep 3s infinite;
-}
-
-/* --- INTERAKCE (HOVER) --- */
-.decret-button:hover {
-    transform: scale(1.1) translateY(-2px); /* Zvětšení a nadzvednutí */
-    box-shadow: 
-        0 0 40px rgba(241, 196, 15, 0.9), 
-        0 0 10px #fff;
-    background: linear-gradient(to bottom, #fff59d 0%, #fdd835 50%, #f9a825 100%);
-}
-
-.decret-button:active {
-    transform: scale(0.95);
-}
-
-/* --- DEFINICE ANIMACÍ --- */
-
-/* 1. Pulzování záře */
-@keyframes legendary-pulse {
-    0% { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); border-color: #fff; }
-    50% { box-shadow: 0 0 35px rgba(241, 196, 15, 1), 0 0 10px rgba(255,255,255,0.8); border-color: #ffe082; }
-    100% { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); border-color: #fff; }
-}
-
-/* 2. Přelet lesku */
-@keyframes shine-sweep {
-    0% { left: -100%; opacity: 0; }
-    20% { opacity: 1; }
-    50% { left: 200%; opacity: 0; } /* Rychlý přelet v první polovině času */
-    100% { left: 200%; opacity: 0; } /* Pauza do konce cyklu */
-}
-
-/* 3. Přílet tlačítka na scénu */
-@keyframes popIn {
-    0% { opacity: 0; transform: scale(0.5); }
-    100% { opacity: 1; transform: scale(1); }
+    .stat-button {
+        width: auto; /* Tlačítko nebude přes celou šířku, jen tak velké jak je třeba */
+        padding: 8px 20px; /* Větší pro dotyk */
+        margin-top: 0;
+    }
 }

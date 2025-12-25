@@ -225,3 +225,73 @@ a:visited {
     transition: all 0.3s ease; 
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3); /* Jemný stín */
 }   
+
+/* =========================================
+   RESPONZIVITA - PŘIDAT NA KONEC APP.CSS
+   ========================================= */
+
+/* 1. Univerzální pravidlo pro obrázky a elementy */
+* {
+    box-sizing: border-box; /* Zajistí, že padding neroztahuje šířku elementu */
+}
+
+img {
+    max-width: 100%; /* Obrázky nikdy nepřetečou šířku displeje */
+    height: auto;    /* Zachová poměr stran */
+}
+
+/* 2. Responzivní hlavička (Header) */
+header {
+    display: flex;
+    flex-wrap: wrap; /* Povolí zalamování tlačítek na další řádek */
+    justify-content: center;
+    gap: 10px; /* Mezera mezi tlačítky */
+    padding-bottom: 20px;
+}
+
+/* 3. Media Query pro mobily (typicky pod 600px) */
+@media (max-width: 600px) {
+
+    /* Zmenšení okrajů stránky */
+    body {
+        padding: 10px; /* Původně 20px, na mobilu stačí méně */
+    }
+
+    /* Úprava nadpisů, aby nebyly obří */
+    h1 {
+        font-size: 1.8rem; 
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+        margin-top: 20px;
+    }
+
+    /* Texty na mobilu lépe čitelné */
+    p, li {
+        font-size: 16px; /* Mírně menší než 18px, ale stále čitelné */
+        text-align: justify; /* Volitelné: zarovnání do bloku */
+    }
+
+    /* Hlavička - tlačítka přes celou šířku nebo 2 vedle sebe */
+    .header-link {
+        flex: 1 1 45%; /* Tlačítka se roztáhnou, minimálně 45% šířky */
+        margin: 5px 0;
+        padding: 12px 10px; /* Větší plocha pro prst */
+        font-size: 15px;
+    }
+    
+    /* Tlačítko Zpět může být menší nebo na vlastním řádku */
+    button[onclick="window.history.back()"] {
+        flex: 1 1 100%; /* Zpět přes celou šířku */
+        margin-top: 10px;
+        background-color: #3e2723; /* Tmavší pro odlišení (volitelné) */
+    }
+
+    /* Kontejner obsahu */
+    .container {
+        margin-top: 10px;
+        width: 100%;
+    }
+}
