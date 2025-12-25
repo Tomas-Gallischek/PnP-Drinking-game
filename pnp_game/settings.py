@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-5h(b0((791!=ugmjo=5%1!wuw4j)=(@nmb_za=-+t!in#&!-ib
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['shrek202.pythonanywhere.com']
+ALLOWED_HOSTS = ['shrek.pythonanywhere.com']
 # Místo 'vaseslozka' dej své uživatelské jméno na PythonAnywhere.
 
 
