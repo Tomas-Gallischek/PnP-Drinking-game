@@ -13,7 +13,8 @@ SECRET_KEY = 'django-insecure-5h(b0((791!=ugmjo=5%1!wuw4j)=(@nmb_za=-+t!in#&!-ib
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['shrek202.pythonanywhere.com']
+# Místo 'vaseslozka' dej své uživatelské jméno na PythonAnywhere.
 
 
 # Application definition
@@ -122,3 +123,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
