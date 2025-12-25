@@ -114,9 +114,8 @@ class player(models.Model):
     hp_now = models.FloatField(blank=True, default=1)
     hp_actual_fight = models.IntegerField(blank=True, default=1)
 
-    critic_chance = models.FloatField(default=1, blank=True, null=True)  # šance na kritický zásah
-    dodge_chance = models.FloatField(default=1, blank=True, null=True)  # šance na vyšší obranu
-
+    critic_chance = models.FloatField(default=1, blank=True, null=True, validators=[MinValueValidator(0), MaxValueValidator(50)])  # šance na kritický zásah
+    dodge_chance = models.FloatField(default=1, blank=True, null=True, validators=[MinValueValidator(0), MaxValueValidator(50)])
     
     def energy_change(self):
         if self.energie <= 200:
@@ -154,17 +153,17 @@ class player(models.Model):
 
     # ABY SE POSTAVY VYLEPŠOVALY I LEVELEM TROCHU
             if self.povolani == 'mag':
-                self.hp_now += self.hp_koef
-                self.dmg_now += self.dmg_koef
-                self.armor_now += self.armor_koef
+                self.hp_now += round(self.hp_koef / 3)
+                self.dmg_now += round(self.dmg_koef / 3)
+                self.armor_now += round(self.armor_koef / 3)
             elif self.povolani == 'hunter':
-                self.hp_now += self.hp_koef
-                self.dmg_now += self.dmg_koef
-                self.armor_now += self.armor_koef
+                self.hp_now += round(self.hp_koef / 3)
+                self.dmg_now += round(self.dmg_koef / 3)
+                self.armor_now += round(self.armor_koef / 3)
             elif self.povolani == 'valecnik':
-                self.hp_now += self.hp_koef
-                self.dmg_now += self.dmg_koef
-                self.armor_now += self.armor_koef
+                self.hp_now += round(self.hp_koef / 3)
+                self.dmg_now += round(self.dmg_koef / 3)
+                self.armor_now += round(self.armor_koef / 3)
 
             self.skill_points += 3
 

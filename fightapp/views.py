@@ -259,15 +259,61 @@ def fight(request):
         next_patro = patro + 1
         next_boss_info = boss_names_descriptions.objects.get(patro=next_patro)
         next_lvl = actual_boss.lvl + 1
-        next_reward = round(actual_boss.reward_xp * 1.15)
+        next_reward = round(actual_boss.reward_xp * 1.1)
         hraci = pocet_hracu.objects.first()
         pocet_hracu_now = hraci.pocet_hracu_now
-        print("Počet hráčů nyní:", pocet_hracu_now)
+        next_criti_chance = actual_boss.lvl * 1.5
+        if next_criti_chance > 50:
+            next_criti_chance = 50
+        next_dodge_chance = actual_boss.lvl * 1.5
+        if next_dodge_chance > 50:
+            next_dodge_chance = 50
         
+        all_skill_points = 0
 
         for p in players:
             p.add_xp(actual_boss.reward_xp)
+            all_skill_points += p.skill_points
             p.save()
+
+# POJISTKA KDYBY HRÁČI NEVYLEPŠOVALI POSTAVY
+
+        prum_skill_points = round(all_skill_points / pocet_hracu_now)
+
+        if prum_skill_points <= 3:
+            skill_point_balance = 1.0
+        elif prum_skill_points <= 6:
+            skill_point_balance = 1.1
+        elif prum_skill_points <= 9:
+            skill_point_balance = 1.4
+        elif prum_skill_points <= 12:
+            skill_point_balance = 1.8
+        elif prum_skill_points <= 15:
+            skill_point_balance = 2.5
+        else:
+            pass
+        
+        print(f"Skill point balance pro nového bosse: {skill_point_balance} (průměrný skill point hráče: {prum_skill_points})")
+
+        dmg = round((hraci.all_players_dmg / pocet_hracu_now) * 1.15) * skill_point_balance
+        armor = round((hraci.all_players_armor / pocet_hracu_now) * 0.8) * skill_point_balance
+        hp = round((hraci.all_player_hp * 0.9)) * skill_point_balance
+
+# POJISTKA ABY NÁSLEDUJÍCÍ BOS BYL VŽDYCKY SILNĚJŠÍ NEŽ PŘEDCHOZÍ
+
+        actual_dmg = actual_boss.dmg
+        actual_armor = actual_boss.armor
+        actual_hp = actual_boss.hp
+
+        if dmg < actual_dmg:
+            dmg = actual_boss.dmg * 1.1
+            print("POJISTKA DMG AKTIVOVÁNA")
+        if armor < actual_armor:
+            armor = actual_boss.armor * 1.1
+            print("POJISTKA ARMOR AKTIVOVÁNA")
+        if hp < actual_hp:
+            hp = actual_boss.hp * 1.1
+            print("POJISTKA HP AKTIVOVÁNA")
 
 
         boss.objects.create(
@@ -278,12 +324,12 @@ def fight(request):
             defeated = False,
             lvl = next_lvl,
 
-            dmg = round(hraci.all_players_dmg / pocet_hracu_now) * 1.15,
-            armor = round(hraci.all_players_armor / pocet_hracu_now) * 0.9,
-            hp = round(hraci.all_player_hp * 0.9),
+            dmg = dmg,
+            armor = armor,
+            hp = hp,
 
-            critic_chance = actual_boss.lvl * 1.5,
-            dodge_chance = actual_boss.lvl * 1.5,
+            critic_chance = next_criti_chance,
+            dodge_chance = next_dodge_chance,
 
             reward_xp = round(next_reward)
         )
@@ -291,9 +337,9 @@ def fight(request):
         print("Patro:", next_patro)
         print("Jméno:", next_boss_info.name)
         print("Úroveň:", next_lvl)
-        print("DMG:", round((((hraci.all_players_dmg) / pocet_hracu_now) * 0.15 ) + ((actual_boss.dmg) * 1.1)))
-        print("Armor:", round((((hraci.all_players_armor) / pocet_hracu_now) * 0.1 ) + ((actual_boss.armor) * 1.1)))
-        print("HP:", round((((hraci.all_player_hp) / pocet_hracu_now) * 0.2) + ((actual_boss.hp) * 1.1)))
+        print("DMG:", dmg)
+        print("Armor:", armor)
+        print("HP:", hp)
         print("Odměna XP:", round(next_reward))
 
     

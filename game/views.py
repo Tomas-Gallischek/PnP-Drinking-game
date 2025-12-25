@@ -389,7 +389,7 @@ def reset(request):
             povolani = random.choice(moznosti_povolani)
             if povolani == 'mag':
                 dmg = 20
-                dmg_koef = 43
+                dmg_koef = 45
                 obrana = 5
                 obrana_koef = 5
                 hp = 70
@@ -397,19 +397,19 @@ def reset(request):
                 role_id = 1
             elif povolani == 'valecnik': 
                 dmg = 10
-                dmg_koef = 25
+                dmg_koef = 15
                 obrana = 15
                 obrana_koef = 15
                 hp = 120
-                hp_koef = 300
+                hp_koef = 250
                 role_id = 3
             elif povolani == 'hunter':
                 dmg = 14
-                dmg_koef = 32
+                dmg_koef = 30
                 obrana = 10
                 obrana_koef = 10
                 hp = 90
-                hp_koef = 200
+                hp_koef = 150
                 role_id = 2
             else:
                 povolani = 'obycejny clovek'
@@ -520,6 +520,8 @@ def test(request):
             actual_patro = actual_boss.patro
 
             all_players = player.objects.all()
+
+
             for p in all_players:
                 stat_up_test(request, p.id)
             

@@ -32,7 +32,7 @@
     }
 
     /* --- BOJOVNÍCI --- */
-/* 1. ÚPRAVA KONTEJNERU: Aby se přizpůsobil výšce postavy */
+    /* 1. ÚPRAVA KONTEJNERU: Aby se přizpůsobil výšce postavy */
     .fighter {
         position: relative;
         width: 200px; /* Šířka sloupce zůstává, aby HP bar neulétl */
@@ -139,6 +139,25 @@
         100% { transform: translate(0, 0); filter: brightness(1); }
     }
 
+    /* --- NOVÉ ANIMACE PRO KRITICKÝ ZÁSAH A OBRANU --- */
+    
+    /* 1. Kritický zásah - silnější otřes + červený záblesk */
+    @keyframes shake-hard {
+        0% { transform: translate(0, 0); filter: brightness(1); }
+        10% { transform: translate(-10px, -5px) rotate(-5deg); filter: brightness(3) sepia(1) hue-rotate(-50deg); } 
+        30% { transform: translate(10px, 5px) rotate(5deg); }
+        50% { transform: translate(-10px, 0); }
+        70% { transform: translate(10px, 0); }
+        100% { transform: translate(0, 0); filter: brightness(1); }
+    }
+
+    /* 2. Obranný postoj - zvětšení a modrá aura */
+    @keyframes defense-pulse {
+        0% { transform: scale(1); box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+        50% { transform: scale(1.15); box-shadow: 0 0 25px rgba(52, 152, 219, 0.8); border-color: #3498db; }
+        100% { transform: scale(1); box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+    }
+
     .dmg-floater {
         position: absolute;
         top: 20%; left: 50%;
@@ -162,6 +181,10 @@
     .anim-attack-left { animation: lunge-left 0.4s ease-in-out; }
     .anim-shake { animation: shake-hit 0.2s ease-in-out; }
     .anim-float { animation: float-up-fade 1.5s forwards; }
+    
+    /* Třídy pro nové animace */
+    .anim-shake-hard { animation: shake-hard 0.4s ease-in-out; }
+    .anim-defensive { animation: defense-pulse 1.0s ease-in-out; }
 
     /* --- NOVÝ DESIGN VÝSLEDKU (OVERLAY) --- */
     .result-overlay {
@@ -298,6 +321,11 @@
             is_boss_attacker: {% if turn.attacker_is_boss %}true{% else %}false{% endif %},
             dmg: {{ turn.damage_dealt }},
             
+            // --- NOVÉ POLOŽKY ---
+            is_critical: {% if turn.critic_status %}true{% else %}false{% endif %},
+            is_defensive: {% if turn.bojovy_postoj_status %}true{% else %}false{% endif %},
+            // --------------------
+            
             player_name: "{% if turn.attacker_is_boss %}{{ turn.target_player.name|escapejs }}{% else %}{{ turn.attacker_player.name|escapejs }}{% endif %}",
             player_img_url: "{% if turn.attacker_is_boss %}{% if turn.target_player.profile_img %}{{ turn.target_player.profile_img.url }}{% endif %}{% else %}{% if turn.attacker_player.profile_img %}{{ turn.attacker_player.profile_img.url }}{% endif %}{% endif %}",
             
@@ -373,47 +401,91 @@
 
         await wait(200);
 
+        // Určení elementů pro útočníka a obránce
+        let attackerSlot, defenderSlot, defenderHpBar, defenderHpText, defenderDmgFloat, animAttack;
+        let defenderHpAfter, defenderMaxHp;
+
         if (turn.is_boss_attacker) {
             // BOSS -> HRÁČ
+            attackerSlot = els.bossSlot;
+            defenderSlot = els.heroSlot; // Tady je avatar hráče
+            defenderHpBar = els.heroHpBar;
+            defenderHpText = els.heroHpText;
+            defenderDmgFloat = els.heroDmgFloat;
+            animAttack = 'anim-attack-left';
+            
+            defenderHpAfter = turn.player_hp_after;
+            defenderMaxHp = turn.player_max_hp;
+            
             els.logText.innerText = `🐺 Boss útočí na ${turn.player_name}!`;
-            els.bossSlot.classList.add('anim-attack-left');
-            await wait(300);
-
-            els.heroSlot.classList.add('anim-shake');
-            showFloatingDamage(els.heroDmgFloat, turn.dmg);
-            updateHpBar(els.heroHpBar, els.heroHpText, turn.player_hp_after, turn.player_max_hp);
-
-            await wait(300); 
-            els.bossSlot.classList.remove('anim-attack-left');
-            await wait(200);
-            els.heroSlot.classList.remove('anim-shake');
-
         } else {
             // HRÁČ -> BOSS
+            attackerSlot = els.heroSlot;
+            defenderSlot = els.bossSlot;
+            defenderHpBar = els.bossHpBar;
+            defenderHpText = els.bossHpText;
+            defenderDmgFloat = els.bossDmgFloat;
+            animAttack = 'anim-attack-right';
+
+            defenderHpAfter = turn.boss_hp_after;
+            defenderMaxHp = turn.boss_max_hp;
+
             els.logText.innerText = `⚔️ ${turn.player_name} útočí na Bosse!`;
-            els.heroSlot.classList.add('anim-attack-right');
-            await wait(300);
-
-            els.bossSlot.classList.add('anim-shake');
-            showFloatingDamage(els.bossDmgFloat, turn.dmg);
-            updateHpBar(els.bossHpBar, els.bossHpText, turn.boss_hp_after, turn.boss_max_hp);
-
-            await wait(300);
-            els.heroSlot.classList.remove('anim-attack-right');
-            await wait(200);
-            els.bossSlot.classList.remove('anim-shake');
         }
+
+        // --- OBRANNÝ POSTOJ ---
+        // Pokud je aktivní obranný postoj, spustíme animaci na obránci TEĎ (před zásahem)
+        if (turn.is_defensive) {
+            const defenderImg = defenderSlot.querySelector('.fighter-img');
+            defenderImg.classList.add('anim-defensive');
+            // Malá pauza, aby hráč stihl zaregistrovat obranu
+            await wait(300);
+        }
+
+        // Spuštění útoku
+        attackerSlot.classList.add(animAttack);
+        await wait(300); // Čas než útok "dopadne"
+
+        // --- KRITICKÝ ZÁSAH ---
+        if (turn.is_critical) {
+            defenderSlot.classList.add('anim-shake-hard');
+            els.logText.innerText += " (KRITICKÝ ZÁSAH!)";
+        } else {
+            defenderSlot.classList.add('anim-shake');
+        }
+
+        showFloatingDamage(defenderDmgFloat, turn.dmg, turn.is_critical);
+        updateHpBar(defenderHpBar, defenderHpText, defenderHpAfter, defenderMaxHp);
+
+        await wait(300); // Čas na dokončení animace otřesu
+
+        // Cleanup animací
+        attackerSlot.classList.remove(animAttack);
+        defenderSlot.classList.remove('anim-shake');
+        defenderSlot.classList.remove('anim-shake-hard');
+        
+        // Odstranění obranné třídy z obrázku
+        const defenderImg = defenderSlot.querySelector('.fighter-img');
+        if (defenderImg) defenderImg.classList.remove('anim-defensive');
 
         await wait(500);
     }
 
-    function showFloatingDamage(element, dmg) {
+    function showFloatingDamage(element, dmg, isCritical) {
         if (dmg <= 0) {
             element.innerText = "MISS";
             element.style.color = "#bdc3c7";
+            element.style.fontSize = "3rem";
         } else {
             element.innerText = "-" + dmg;
-            element.style.color = "#ff0000";
+            if (isCritical) {
+                element.style.color = "#e74c3c"; // Jasnější červená
+                element.style.fontSize = "4.5rem"; // Větší text
+                element.innerText += "!";
+            } else {
+                element.style.color = "#ff0000";
+                element.style.fontSize = "3rem";
+            }
         }
         element.classList.remove('anim-float');
         void element.offsetWidth; 
@@ -458,8 +530,7 @@
         };
     });
 
-// 6. AUTOMATICKÝ START PO NAČTENÍ
-    // Používáme DOMContentLoaded, který je spolehlivější a nekoliduje s base.html
+    // 6. AUTOMATICKÝ START PO NAČTENÍ
     document.addEventListener("DOMContentLoaded", function() {
         runBattle();
     });

@@ -14,7 +14,7 @@ def tut_end(request):
 
         if povolani == 'mag':
             dmg = 20
-            dmg_koef = 43
+            dmg_koef = 45
             obrana = 5
             obrana_koef = 5
             hp = 70
@@ -22,19 +22,19 @@ def tut_end(request):
             role_id = 1
         elif povolani == 'valecnik': 
             dmg = 10
-            dmg_koef = 25
+            dmg_koef = 15
             obrana = 15
             obrana_koef = 15
             hp = 120
-            hp_koef = 300
+            hp_koef = 250
             role_id = 3
         elif povolani == 'hunter':
             dmg = 14
-            dmg_koef = 32
+            dmg_koef = 30
             obrana = 10
             obrana_koef = 10
             hp = 90
-            hp_koef = 200
+            hp_koef = 150
             role_id = 2
         else:
             povolani = 'obycejny clovek'
@@ -80,6 +80,9 @@ def tut_end(request):
 
         print(f"Vytvořen hráč: {this_player.name} s povoláním {this_player.povolani}")
 
+        #Smazání stávajících achievements pro hráče (pro jistotu)
+        achievements.objects.filter(player=this_player).delete()
+
         #Založení achievemts pro hráče
         achievements.objects.create(
             player=this_player,
@@ -114,10 +117,16 @@ def vyber_povolani(request):
         player_id = request.POST.get('player_id')
         
         chosen_player = player.objects.get(id=player_id)
+        pocet_magu = player.objects.filter(povolani="mag", active=True).count()
+        pocet_valecniku = player.objects.filter(povolani="valecnik", active=True).count()
+        pocet_hunteru = player.objects.filter(povolani="hunter", active=True).count()
         
 
     return render(request, 'tutorialapp/vyber_povolani.html', context={
-        "chosen_player": chosen_player
+        "chosen_player": chosen_player,
+        "pocet_magu": pocet_magu,
+        "pocet_valecniku": pocet_valecniku,
+        "pocet_hunteru": pocet_hunteru,
 
     })
 

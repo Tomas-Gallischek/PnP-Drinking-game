@@ -1,5 +1,6 @@
 from django.db import models
 from game.models import player
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class boss_names_descriptions(models.Model):
     patro = models.IntegerField(default=1)
@@ -21,12 +22,12 @@ class boss(models.Model):
 
     lvl = models.IntegerField(default=1)
 
-    dmg = models.IntegerField(default=1)
+    dmg = models.IntegerField(default=1, validators=[MinValueValidator(1)])
     armor = models.IntegerField(default=1)
     hp = models.IntegerField(default=10)
 
-    critic_chance = models.FloatField(default=1, blank=True, null=True)  # šance na kritický zásah
-    dodge_chance = models.FloatField(default=1, blank=True, null=True)  # šance na vyšší obranu
+    critic_chance = models.FloatField(default=1, blank=True, null=True, validators=[MinValueValidator(0), MaxValueValidator(50)])  # šance na kritický zásah
+    dodge_chance = models.FloatField(default=1, blank=True, null=True, validators=[MinValueValidator(0), MaxValueValidator(50)])  # šance na vyšší obranu
 
     reward_xp = models.IntegerField(default=10)
 
