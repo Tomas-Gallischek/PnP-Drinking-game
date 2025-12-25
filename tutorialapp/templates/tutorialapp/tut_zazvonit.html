@@ -1,24 +1,74 @@
 {% extends "base2.html" %}
 
+{% block styly %}
+<style>
+    .tutorial-card {
+        background-color: #2c2c2c;
+        border: 4px solid #b8860b;
+        border-radius: 15px;
+        padding: 40px;
+        max-width: 700px;
+        margin: 50px auto;
+        text-align: center;
+        font-family: 'Georgia', serif;
+        color: #ecf0f1;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+    .tutorial-card h1 {
+        color: #ffd700;
+        text-shadow: 2px 2px 4px #000;
+        border-bottom: 1px solid #b8860b;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+    }
+    .quest-box {
+        background-color: rgba(0, 0, 0, 0.3);
+        border: 1px dashed #ffd700;
+        padding: 20px;
+        margin: 30px 0;
+        border-radius: 8px;
+    }
+    .secret-code {
+        color: #ffd700;
+        font-size: 2em;
+        font-weight: bold;
+        letter-spacing: 3px;
+        text-shadow: 1px 1px 2px black;
+        display: block;
+        margin-top: 10px;
+    }
+    .instruction {
+        color: #bdc3c7;
+        margin-top: 30px;
+        font-style: italic;
+    }
+    .action-btn {
+        width: 50%;
+        margin: 0 auto;
+    }
+</style>
+{% endblock styly %}
+
 {% block content %}
 
-<h1>TUTORIAL:</h1>
+<div class="tutorial-card">
+    <h1>PRVNÍ ÚKOL</h1>
 
-<h2>Nyní tě čeká tvůj první quest dobrodruhu:</h2>
+    <h2>Nyní tě čeká tvůj první quest, dobrodruhu:</h2>
 
-<h3>Zazvoň na zvonek tajné heslo, které je:</h3>
+    <div class="quest-box">
+        <h3>Zazvoň na zvonek tajné heslo, které je:</h3>
+        <span class="secret-code">"S" v morzeovce</span>
+    </div>
 
-<br>
+    <h3 class="instruction">Jakmile ti bude otevřeno, klikni na tlačítko další.</h3>
 
-<h3><strong><u>"S" v morzeovce</u></strong></h3>
-
-
-<h3>Jakmile ti bude otevřeno, klikni na talčítko další.</h3>
-
-<form action="{% url "tut_odloz_si" %}">
-    <button type="submit" class="button">DALŠÍ</button>
-    <input type="hidden" name="player_id" value="{{ player_id }}">
-</form>
+    <div class="action-btn">
+        <form action="{% url "tut_odloz_si" %}">
+            <button type="submit" class="button">DALŠÍ</button>
+            <input type="hidden" name="player_id" value="{{ player_id }}">
+        </form>
+    </div>
+</div>
 
 {% endblock content %}
-

@@ -1,49 +1,118 @@
 {% extends "base2.html" %}
 
+{% block styly %}
+<style>
+    .tutorial-card {
+        background-color: #2c2c2c;
+        border: 4px solid #b8860b;
+        border-radius: 15px;
+        padding: 40px;
+        max-width: 900px;
+        margin: 30px auto;
+        font-family: 'Georgia', serif;
+        color: #ecf0f1;
+        text-align: center;
+    }
+    .main-title {
+        color: #ffd700;
+        text-transform: uppercase;
+        border-bottom: 2px solid #b8860b;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+    }
+    .section-title {
+        color: #f1c40f;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        text-decoration: none; /* Odstranění podtržení z původního HTML */
+        font-size: 1.5em;
+    }
+    
+    .info-block {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .class-list li {
+        margin-bottom: 10px;
+        color: #ddd;
+    }
+    .class-name { color: #ffd700; font-weight: bold; }
+
+    .highlight-text { color: #fff; font-weight: bold; }
+    
+    .goal-section {
+        border: 2px solid #c0392b;
+        background: rgba(192, 57, 43, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 30px;
+    }
+    .meme-landia {
+        color: #e74c3c;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 40px;
+    }
+    .button-container form { width: 150px; }
+</style>
+{% endblock styly %}
+
 {% block content %}
 
-<h1>TUTORIAL:</h1>
+<div class="tutorial-card">
 
-<h2><u>Základy hry</u></h2>
+    <h1 class="main-title">Základy hry</h1>
 
-<h2><u>Tvoje postava:</u></h2>
-
-<b>
-    <p>Na konci tothoto tutoriálu si můžeš vybrat jednu ze tří postav:
-        <ul>
-            <li><u>Kouzelník</u> - Velké poškození, slabá obrana</li>
-            <li><u>Válečník</u> - Malé poškození, velká výdrž</li>
-            <li><u>Hunter</u> - Univerzální volba</li>
+    <div class="info-block">
+        <h2 class="section-title">Tvoje postava</h2>
+        <p>Na konci tohoto tutoriálu si můžeš vybrat jednu ze tří postav:</p>
+        <ul class="class-list">
+            <li><span class="class-name">Kouzelník</span> - Velké poškození, slabá obrana</li>
+            <li><span class="class-name">Válečník</span> - Malé poškození, velká výdrž</li>
+            <li><span class="class-name">Hunter</span> - Univerzální volba</li>
         </ul>
-    </p>
-</b>
+    </div>
 
-<p>Každý hráč má svojí postavu kterou vylepšuje tím, jak si užívá silvestrovksý večer a to konkrétně dvěma způsoby:
-    <ul>
-        <li><b><strong>Plněním Questů</strong></b></li>
-        <li><b><strong>Pitím</strong></b></li>
-    </ul>
-</p>
+    <div class="info-block">
+        <h2 class="section-title">Jak hrát</h2>
+        <p>Každý hráč má svojí postavu, kterou vylepšuje tím, jak si užívá silvestrovský večer, a to konkrétně dvěma způsoby:</p>
+        <ul>
+            <li><span class="highlight-text">Plněním Questů</span></li>
+            <li><span class="highlight-text">Pitím</span></li>
+        </ul>
+        <br>
+        <p>Za tyto aktivity tvá postava získává <strong>XP body</strong> a zvyšuje si svůj <strong>level</strong>.</p>
+        <p>Za každý nový lvl dostane tvoje postava <strong>+3 skill pointy</strong>, díky kterým si může vylepšit svůj útok, obranu nebo životy.</p>
+    </div>
 
-<p>Za tyto aktivity tvá postava získává XP body a za ně si zvyšuje svůj lvl</p>
+    <div class="goal-section">
+        <h2 class="section-title" style="color: #e74c3c; margin-top: 0;">CÍL HRY</h2>
+        <h4>Cílem hry je porazit 25 nebezpečných BOSSŮ světa <span class="meme-landia">MEME-LANDIA</span>, kteří zachvátili tuto nádhernou zemi.</h4>
+        <p>Jen vy je můžete zastavit! Bojujte jako jeden a nenechte se zastrašit jejich příšerným humorem!</p>
+    </div>
 
-<p>Za každý nový lvl dosatne tvoje postava +3 <b>skill pointy</b> díky kterým si může vylepšit svůj útok, obranu nebo životy</p>
+    <div class="button-container">
+        <form action="{% url "tut_odloz_si" %}">
+            <button type="submit" class="button" style="background-color: #555; border-color: #777;">ZPĚT</button>
+            <input type="hidden" name="player_id" value="{{ player_id }}">
+        </form>
 
-<h2><u>CÍL HRY:</u></h2>
+        <form action="{% url "vyber_postavy" %}">
+            <button type="submit" class="button">DALŠÍ</button>
+            <input type="hidden" name="player_id" value="{{ player_id }}">
+        </form>
+    </div>
 
-<h4>Cílem hry je porazit 25 nebezpečných BOSSŮ světa <b><strong>MEME-LANDIA</strong></b>, kteří zachvátili tuto nádhernou zemi.</h4>
-
-<h2>Jen vy je můžete zastavit! Bojujte jako jeden a nenechte se zastrašit jejich příšerným humorem!</h2>
-
-<form action="{% url "vyber_postavy" %}">
-    <button type="submit" class="button">DALŠÍ</button>
-    <input type="hidden" name="player_id" value="{{ player_id }}">
-</form>
-
-<form action="{% url "tut_odloz_si" %}">
-    <button type="submit" class="button">ZPĚT</button>
-    <input type="hidden" name="player_id" value="{{ player_id }}">
-</form>
-
+</div>
 
 {% endblock content %}
