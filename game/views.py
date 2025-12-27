@@ -167,8 +167,8 @@ def take_quest(request):
             expirated_quests.delete()
 
             return redirect('player_info', player_id=one_player.id)
-    
-    return redirect('index')
+    else:
+        return redirect('index')
 
 def quest_generator(request, player_id):
     one_player = player.objects.get(id=player_id)
