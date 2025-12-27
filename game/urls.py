@@ -22,5 +22,6 @@ urlpatterns = [
     path('decret', views.decret, name='decret'),
     path('skill_reset/<int:player_id>/', views.skill_reset, name='skill_reset'),
     path('napoveda', views.napoveda, name='napoveda'),
+    path('low_energy', views.low_energy, name='low_energy'),
 
 ]

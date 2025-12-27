@@ -87,21 +87,29 @@ def quest_failed(request):
         user=request.POST.get('player_id')
         quest_id = request.POST.get('quest_id')
         failed_quest = side_quest.objects.get(id=quest_id)
-        one_player_id = failed_quest.player
+
+        one_player_obj = failed_quest.player
+        one_player_id = one_player_obj.id
         one_player = player.objects.get(id=one_player_id)
-        coop_player_id = failed_quest.player_coop or None
-        coop_player = player.objects.get(name=coop_player_id) if coop_player_id else None
-        failed_quest.delete()
-        print(f"coop_player: {coop_player}")
-        print(f"one_player: {one_player}")
-        print(f"failed_quest: {failed_quest}")
 
-        one_player.energy_update(50)
-        coop_player.energy_update(50) if coop_player else None
+        coop_player_name = failed_quest.player_coop if failed_quest.player_coop else None
+        coop_player = player.objects.get(name=coop_player_name) if coop_player_name else None
 
 
+        if one_player.energie < 50 or (coop_player and coop_player.energie < 50):
+            return redirect('low_energy')
+        else:
+            failed_quest.delete()
+            print(f"coop_player: {coop_player}")
+            print(f"one_player: {one_player}")
+            print(f"failed_quest: {failed_quest}")
 
-        return redirect('player_info', player_id=one_player.id)
+            one_player.energy_update(50)
+            coop_player.energy_update(50) if coop_player else None
+
+
+
+            return redirect('player_info', player_id=one_player.id)
     
     return redirect('index')
 
@@ -113,44 +121,52 @@ def take_quest(request):
         coop_player = player.objects.get(id=user_coop) if user_coop else None 
         print(f"Quest pro hráče: {user}, coop hráč: {user_coop}")
 
-        quest_id = request.POST.get('quest_id')
-        selected_quest = side_quest_generated.objects.get(id=quest_id)
-
-        one_player.quest_refresh += 1
-        one_player.save()
-
         if coop_player:
-            quest_name_final = selected_quest.quest_name+"("+one_player.name+" & "+coop_player.name+")"
+            if one_player.energie < 20 or coop_player.energie < 20:
+                return redirect('low_energy')
+        elif one_player.energie < 20:
+            return redirect('low_energy')
         else:
-            quest_name_final = selected_quest.quest_name+"("+one_player.name+")"
 
-        new_quest = side_quest.objects.create(
-            player=one_player,
-            player_name= one_player.name,
-            player_coop= coop_player.name if coop_player else "",
-            coop_player_name= coop_player.name if coop_player else "",
-            quest_type=selected_quest.quest_type,
-            quest_name=quest_name_final,
-            description=selected_quest.description,
-            xp_reward=selected_quest.xp_reward,
-            rarity=selected_quest.rarity,
-            done=False,
-        )       
+            quest_id = request.POST.get('quest_id')
+            selected_quest = side_quest_generated.objects.get(id=quest_id)
 
-        new_quest.save()
+            one_player.quest_refresh += 1
+            one_player.save()
 
-        one_player.energy_update(20)
+            if coop_player:
+                quest_name_final = selected_quest.quest_name+"("+one_player.name+" & "+coop_player.name+")"
+            else:
+                quest_name_final = selected_quest.quest_name+"("+one_player.name+")"
 
-        print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {one_player.name}: {one_player.energie}")
+            new_quest = side_quest.objects.create(
+                player=one_player,
+                player_name= one_player.name,
+                player_coop= coop_player.name if coop_player else "",
+                coop_player_name= coop_player.name if coop_player else "",
+                quest_type=selected_quest.quest_type,
+                quest_name=quest_name_final,
+                description=selected_quest.description,
+                xp_reward=selected_quest.xp_reward,
+                rarity=selected_quest.rarity,
+                done=False,
+            )       
 
-        if coop_player:
-            coop_player.energy_update(20)
-            print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {coop_player.name}: {coop_player.energie}" if coop_player else "Žádný coop hráč.")
+            new_quest.save()
 
-        expirated_quests = side_quest_generated.objects.filter(player=one_player)
-        expirated_quests.delete()
+            one_player.energy_update(20)
+            coop_player.energy_update(20) if coop_player else None
 
-        return redirect('player_info', player_id=one_player.id)
+            print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {one_player.name}: {one_player.energie}")
+
+            if coop_player:
+                coop_player.energy_update(20)
+                print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {coop_player.name}: {coop_player.energie}" if coop_player else "Žádný coop hráč.")
+
+            expirated_quests = side_quest_generated.objects.filter(player=one_player)
+            expirated_quests.delete()
+
+            return redirect('player_info', player_id=one_player.id)
     
     return redirect('index')
 
@@ -370,7 +386,7 @@ def index22(request):
     return render(request, 'game/index22.html')
 
 def index(request):
-    all_players = player.objects.all().filter(active=True)
+    all_players = player.objects.all()
 
     return render(request, 'game/index.html', {
         'all_players': all_players,
@@ -791,3 +807,6 @@ def skill_reset(request, player_id):
     
 def napoveda(request):
     return render(request, 'game/napoveda.html')
+
+def low_energy(request):
+    return render(request, 'game/low_energy.html')

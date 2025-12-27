@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5h(b0((791!=ugmjo=5%1!wuw4j)=(@nmb_za=-+t!in#&!-ib'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Seznam hostitelů, na kterých může aplikace běžet
 ALLOWED_HOSTS = [
