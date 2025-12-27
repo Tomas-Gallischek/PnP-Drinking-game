@@ -117,13 +117,18 @@ def take_quest(request):
         one_player.quest_refresh += 1
         one_player.save()
 
+        if coop_player:
+            quest_name_final = selected_quest.quest_name+"("+one_player.name+" & "+coop_player.name+")"
+        else:
+            quest_name_final = selected_quest.quest_name+"("+one_player.name+")"
+
         new_quest = side_quest.objects.create(
             player=one_player,
             player_name= one_player.name,
             player_coop= coop_player.name if coop_player else "",
             coop_player_name= coop_player.name if coop_player else "",
             quest_type=selected_quest.quest_type,
-            quest_name=selected_quest.quest_name,
+            quest_name=quest_name_final,
             description=selected_quest.description,
             xp_reward=selected_quest.xp_reward,
             rarity=selected_quest.rarity,
