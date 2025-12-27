@@ -1,24 +1,35 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block styly %}
+
+<link rel="stylesheet" href="{% static 'game/index.css' %}">
+
+{% endblock styly %}
 
 {% block content %}
 
-<form action="reset" method="post">{% csrf_token %}<button type="submit" name="test_question" value="True" class="button">Reset</button></form>
+<h1>Klikni na svojí postavu:</h1>
 
-<form action="test" method="post">{% csrf_token %}<button type="submit" name="test_question" value="True" class="button">Test</button></form>
+<div class="character-grid">
+    {% for player in all_players %}
+        {% if player.active == False %}
+            <form action="{% url "vyber_povolani" %}" method="post" class="char-form" style="--delay: {{ forloop.counter }};">
+                {% csrf_token %}
+                <input type="hidden" name="player_id" value="{{ player.id }}">
+                <button type="submit" class="button avatar-button">
+                    <div class="player-avatar-container">
+                        <img src="{{ player.profile_img.url }}" alt="profilovka" class="player-avatar">
+                    </div>
+                </button>
+            </form>
+        {% endif %}
+    {% endfor %}
+</div>
 
-<form action="{% url "welcome" %}"> {% csrf_token %} <button type="submit" class="button">Spustit tutorial</button></form>
-
-<form action="active" method="post">{% csrf_token %}<button type="submit" class="button">Aktivovat všechny hráče</button></form>
-
-<form action="deactive" method="post">{% csrf_token %}<button type="submit" class="button">Deaktivovat všechny hráče</button></form>
-
-<form action="auto_stats" method="post">{% csrf_token %}<button type="submit" class="button">Automaticky rozdělit statistiky</button></form>
-
-
+<form action="{% url "tut_seznameni" %}">
+    <button type="submit" class="button">ZPĚT</button>
+    <input type="hidden" name="player_id" value="{{ player_id }}">
+</form>
 
 {% endblock content %}
-
-
-
-
-

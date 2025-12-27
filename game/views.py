@@ -366,8 +366,15 @@ def leaderboard(request):
         'best_dmg': best_dmg,
         })
 
+def index22(request):
+    return render(request, 'game/index22.html')
+
 def index(request):
-    return render(request, 'game/index.html')
+    all_players = player.objects.all().filter(active=True)
+
+    return render(request, 'game/index.html', {
+        'all_players': all_players,
+    })
 
 
 def reset(request):
