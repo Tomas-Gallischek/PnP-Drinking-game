@@ -123,50 +123,52 @@ def take_quest(request):
 
         if coop_player:
             if one_player.energie < 20 or coop_player.energie < 20:
-                return redirect('low_energy')
-        elif one_player.energie < 20:
-            return redirect('low_energy')
-        else:
-
-            quest_id = request.POST.get('quest_id')
-            selected_quest = side_quest_generated.objects.get(id=quest_id)
-
-            one_player.quest_refresh += 1
-            one_player.save()
-
-            if coop_player:
-                quest_name_final = selected_quest.quest_name+"("+one_player.name+" & "+coop_player.name+")"
+                return render(request, 'game/low_energy.html')
+        else:   
+            
+            if one_player.energie < 20:
+                return render(request, 'game/low_energy.html')
             else:
-                quest_name_final = selected_quest.quest_name+"("+one_player.name+")"
 
-            new_quest = side_quest.objects.create(
-                player=one_player,
-                player_name= one_player.name,
-                player_coop= coop_player.name if coop_player else "",
-                coop_player_name= coop_player.name if coop_player else "",
-                quest_type=selected_quest.quest_type,
-                quest_name=quest_name_final,
-                description=selected_quest.description,
-                xp_reward=selected_quest.xp_reward,
-                rarity=selected_quest.rarity,
-                done=False,
-            )       
+                quest_id = request.POST.get('quest_id')
+                selected_quest = side_quest_generated.objects.get(id=quest_id)
 
-            new_quest.save()
+                one_player.quest_refresh += 1
+                one_player.save()
 
-            one_player.energy_update(20)
-            coop_player.energy_update(20) if coop_player else None
+                if coop_player:
+                    quest_name_final = selected_quest.quest_name+"("+one_player.name+" & "+coop_player.name+")"
+                else:
+                    quest_name_final = selected_quest.quest_name+"("+one_player.name+")"
 
-            print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {one_player.name}: {one_player.energie}")
+                new_quest = side_quest.objects.create(
+                    player=one_player,
+                    player_name= one_player.name,
+                    player_coop= coop_player.name if coop_player else "",
+                    coop_player_name= coop_player.name if coop_player else "",
+                    quest_type=selected_quest.quest_type,
+                    quest_name=quest_name_final,
+                    description=selected_quest.description,
+                    xp_reward=selected_quest.xp_reward,
+                    rarity=selected_quest.rarity,
+                    done=False,
+                )       
 
-            if coop_player:
-                coop_player.energy_update(20)
-                print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {coop_player.name}: {coop_player.energie}" if coop_player else "Žádný coop hráč.")
+                new_quest.save()
 
-            expirated_quests = side_quest_generated.objects.filter(player=one_player)
-            expirated_quests.delete()
+                one_player.energy_update(20)
+                coop_player.energy_update(20) if coop_player else None
 
-            return redirect('player_info', player_id=one_player.id)
+                print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {one_player.name}: {one_player.energie}")
+
+                if coop_player:
+                    coop_player.energy_update(20)
+                    print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {coop_player.name}: {coop_player.energie}" if coop_player else "Žádný coop hráč.")
+
+                expirated_quests = side_quest_generated.objects.filter(player=one_player)
+                expirated_quests.delete()
+
+                return redirect('player_info', player_id=one_player.id)
     else:
         return redirect('index')
 
