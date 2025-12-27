@@ -89,10 +89,16 @@ def quest_failed(request):
         quest_id = request.POST.get('quest_id')
         failed_quest = side_quest.objects.get(id=quest_id)
         coop_player = failed_quest.player_coop or None
+        coop_player_id = failed_quest.player_coop or None
+        coop_player = player.objects.get(name=coop_player_id) if coop_player_id else None
         failed_quest.delete()
         print(f"coop_player: {coop_player}")
         print(f"one_player: {one_player}")
         print(f"failed_quest: {failed_quest}")
+
+        one_player.energy_update(50)
+        coop_player.energy_update(50) if coop_player else None
+
 
 
         return redirect('player_info', player_id=one_player.id)
@@ -103,10 +109,6 @@ def take_quest(request):
     if request.method == 'POST':
         user=request.POST.get('player_id') or None
         user_coop = request.POST.get('coop_player_id') or None
-        random_coop = request.POST.get('random_coop_player') or None
-        if random_coop == '1' or random_coop == 1:
-            all_active_players = player.objects.filter(active=True).exclude(id=user)
-            user_coop = random.choice(all_active_players).id if all_active_players.exists() else None
         one_player = player.objects.get(id=user)
         coop_player = player.objects.get(id=user_coop) if user_coop else None 
         print(f"Quest pro hráče: {user}, coop hráč: {user_coop}")

@@ -80,13 +80,6 @@
                         <option value="{{one.id}}">{{one.name}}</option>
                     {% endfor %}
                 </select>
-                nebo
-                <form action="{% url 'take_quest' %}" method="post" class="quest-action-area">
-                    {% csrf_token %}
-                    <input type="hidden" name="quest_id" value="{{ random_quest_coop.id }}">
-                    <input type="hidden" name="player_id" value="{{ player_info.id }}">
-                    <input type="hidden" name="random_coop_player" value=1>
-                    <button type="submit" class="button">Náhodný výběr</button>
             </div>
             <button type="submit" class="button">Přijmout úkol</button>
         </form>
