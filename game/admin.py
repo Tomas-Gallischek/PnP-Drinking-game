@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import player, pocet_hracu, side_quest, side_quest_databese, achievements, jmena_hracu, side_quest_generated, test_model
-
+from typing_extensions import Self
 
 class SideQuestInline(admin.TabularInline):
     model = side_quest

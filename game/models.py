@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 import random
 from colorama import init, Fore, Style
 from django.utils import timezone
+from typing_extensions import Self
 
 
 class pocet_hracu(models.Model):

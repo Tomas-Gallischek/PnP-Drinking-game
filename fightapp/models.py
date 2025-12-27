@@ -1,6 +1,7 @@
 from django.db import models
 from game.models import player
 from django.core.validators import MaxValueValidator, MinValueValidator
+from typing_extensions import Self
 
 class boss_names_descriptions(models.Model):
     patro = models.IntegerField(default=1)
