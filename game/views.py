@@ -85,10 +85,10 @@ def nastenka(request):
 def quest_failed(request):
     if request.method == 'POST':
         user=request.POST.get('player_id')
-        one_player = player.objects.get(id=user)
         quest_id = request.POST.get('quest_id')
         failed_quest = side_quest.objects.get(id=quest_id)
-        coop_player = failed_quest.player_coop or None
+        one_player_id = failed_quest.player
+        one_player = player.objects.get(id=one_player_id)
         coop_player_id = failed_quest.player_coop or None
         coop_player = player.objects.get(name=coop_player_id) if coop_player_id else None
         failed_quest.delete()
