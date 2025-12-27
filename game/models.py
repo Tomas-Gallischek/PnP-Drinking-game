@@ -2,7 +2,6 @@ from turtle import position
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 import random
-from colorama import init, Fore, Style
 from django.utils import timezone
 from typing_extensions import Self
 
@@ -150,7 +149,6 @@ class player(models.Model):
             self.lvl += 1
             self.xp_need = int(round((xp_need + 40)))
 
-            print(Fore.LIGHTCYAN_EX + f"{self.name} level up to {self.lvl}!" + Style.RESET_ALL)
 
     # ABY SE POSTAVY VYLEPŠOVALY I LEVELEM TROCHU
             if self.povolani == 'mag':
