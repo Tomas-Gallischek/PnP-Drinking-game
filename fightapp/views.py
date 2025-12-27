@@ -2,7 +2,7 @@ from math import e
 from operator import ne
 from pickle import FALSE, TRUE
 import random
-from typing import Self
+from typing_extensions import Self
 from django.shortcuts import render
 from tutorialapp import models
 from .models import boss, FightLog, TurnLog, boss_names_descriptions
