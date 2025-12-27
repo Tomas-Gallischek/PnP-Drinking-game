@@ -8,7 +8,6 @@ from tutorialapp import models
 from .models import boss, FightLog, TurnLog, boss_names_descriptions
 from game.models import player, pocet_hracu, achievements, test_model
 from django.db.models import Max
-from colorama import init, Fore, Style
 
 
 def fight(request):
@@ -193,7 +192,6 @@ def fight(request):
             total_boss_dmg += dmg_delt # Sčítáme celkové poškození
             
             if target_player.hp_actual_fight <= 0:
-                print(Fore.RED + f"Hráč {target_player.name} byl poražen!" + Style.RESET_ALL)
                 player_achievement = achievements.objects.get(player=target_player)
                 player_achievement.death_counter += 1
                 player_achievement.save()
@@ -236,12 +234,12 @@ def fight(request):
     # --- VYHODNOCENÍ VÍTĚZE A AKTUALIZACE LOGU ---
     if boss_hp <= 0:
         winner = "players"
-        print(Fore.GREEN + "Boss", actual_boss.name, "byl poražen!" + Style.RESET_ALL)
+
         actual_boss.defeated = True
         actual_boss.save()
     else:
         winner = "boss"
-        print(Fore.RED + "Boss", actual_boss.name, "vítězí!" + Style.RESET_ALL)
+
         
     # Aktualizace hlavního záznamu boje
     fight_log.outcome = winner
