@@ -11,7 +11,6 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
 from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu, pocet_hracu, side_quest_generated, test_model
-from .models import energy_update
 from django.http import HttpResponse
 import random
 from fightapp.views import fight
