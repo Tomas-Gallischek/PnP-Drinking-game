@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
 from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu, pocet_hracu, side_quest_generated, test_model
+from .models import energy_update
 from django.http import HttpResponse
 import random
 from fightapp.views import fight
@@ -19,6 +20,7 @@ from django.utils import timezone
 
 
 def stat_up(request, player_id):
+
     if request.method == 'POST':
         one_player = player.objects.get(id=player_id)
         stat_type = request.POST.get('stat_type')
@@ -131,16 +133,12 @@ def take_quest(request):
 
         new_quest.save()
 
-        one_player.energie -= 20
-        one_player.save()
-        player.energy_change(one_player)
+        one_player.energy_update(20)
 
         print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {one_player.name}: {one_player.energie}")
 
         if coop_player:
-            coop_player.energie -= 20
-            coop_player.save()
-            coop_player.energy_change()
+            coop_player.energy_update(20)
             print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {coop_player.name}: {coop_player.energie}" if coop_player else "Žádný coop hráč.")
 
         expirated_quests = side_quest_generated.objects.filter(player=one_player)
@@ -231,7 +229,7 @@ def quest_refresh(request):
         one_player = player.objects.get(id=user)
 
         if one_player.energie >= 50:
-            one_player.energie -= 50
+            one_player.energy_update(50)
             one_player.quest_refresh += 1
             print("HRÁČI BYLY PŘIČTENY REFRESH POINTY")
             one_player.save()

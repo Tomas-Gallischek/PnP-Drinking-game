@@ -6,7 +6,7 @@ from typing_extensions import Self
 from django.shortcuts import render
 from tutorialapp import models
 from .models import boss, FightLog, TurnLog, boss_names_descriptions
-from game.models import player, pocet_hracu, achievements
+from game.models import player, pocet_hracu, achievements, test_model
 from django.db.models import Max
 from colorama import init, Fore, Style
 
@@ -32,6 +32,14 @@ def fight(request):
     
     # Inicializace proměnných pro boj
     players = player.objects.filter(active=True)
+
+    # ODEČTENÍ ENERGIE:
+    test_status = test_model.objects.first()
+    if test_status.test_status== False:
+        for p in players:
+            p.energy_update(30)
+    else:
+        pass
 
     # --- INICIALIZACE LOGU BOJE ---
     # Vytvoření záznamu o celém boji
@@ -362,14 +370,14 @@ def dungeon(request):
     actual_boss_img = boss_names_descriptions.objects.get(patro=actual_boss.patro).boss_img
 
     energy_request = player.objects.filter(active=True)
-    low_energy_players = energy_request.filter(energie__lt=50)
+    low_energy_players = energy_request.filter(energie__lt=30)
 
     start_status = False
 
     actual_patro = actual_boss.patro
     for p in energy_request:
-        if p.energie < 50:
-            print("Hráč", p.name, "má nedostatek energie:", p.energie)
+        if p.energie < 30:
+            print("Hráč", p.name, "nemá dostatek energie:", p.energie)
             start_status = False
             break
         else:

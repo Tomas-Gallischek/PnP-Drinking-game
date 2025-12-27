@@ -1,3 +1,4 @@
+from math import e
 from turtle import position
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -117,6 +118,8 @@ class player(models.Model):
     critic_chance = models.FloatField(default=1, blank=True, null=True, validators=[MinValueValidator(0), MaxValueValidator(50)])  # šance na kritický zásah
     dodge_chance = models.FloatField(default=1, blank=True, null=True, validators=[MinValueValidator(0), MaxValueValidator(50)])
     
+
+
     def energy_change(self):
         if self.energie <= 200:
             time_now = timezone.now()
@@ -131,7 +134,14 @@ class player(models.Model):
                 self.energie += energy_to_add
             self.last_energy_update = time_now
             self.save()
+        else:
+            self.energie = 200
+            self.save()
 
+    def energy_update(self, energy_cost: int) -> None:
+        self.energie -= energy_cost
+        self.save() 
+        self.energy_change()
 
     # Uvnitř class player(models.Model):
     def add_xp(self, amount):
