@@ -39,7 +39,7 @@
             <h2>Někteří hráči nemají dostatek energie!</h2>
             <ul>
                 {% for player in low_energy_players %}
-                    <p>{{ player.name }} - Energie: {{ player.energie }}</p>
+                    <p>{{ player.name }} - Energie: {{ player.energie }} / 30</p>
                 {% endfor %}
             </ul>
             <p>Počkejte, až si hráči doplní energii.</p>

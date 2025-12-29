@@ -159,7 +159,7 @@ class player(models.Model):
             xp -= xp_need
             self.xp = xp
             self.lvl += 1
-            self.xp_need = int(round((xp_need + 40)))
+            self.xp_need = int(round((xp_need + 50)))
             print(f'{self.name} dosáhl/a LVL {self.lvl}.')
 
 
@@ -189,8 +189,16 @@ class player(models.Model):
                 critic_koef = 1
                 dodge_koef = 2
 
-            self.critic_chance = self.lvl * critic_koef
-            self.dodge_chance = self.lvl * dodge_koef
+            critic_upgrade = self.lvl * critic_koef
+            if critic_upgrade > 50:
+                critic_upgrade = 50
+
+            dodge_upgrade = self.lvl * dodge_koef
+            if dodge_upgrade > 50:
+                dodge_upgrade = 50
+
+            self.critic_chance = critic_upgrade
+            self.dodge_chance = dodge_upgrade
             self.save()
             
             self.lvl_up()  # Rekurzivní volání pro případ, že hráč získal více úrovní najednou
@@ -255,6 +263,7 @@ class side_quest(models.Model):
     xp_reward = models.IntegerField(default=0, blank=True)
     rarity = models.CharField(max_length=50, blank=True, choices=rarity_choices)
     done = models.BooleanField(default=False, blank=True)
+    dificulty = models.IntegerField(default=1, blank=True, null=True, validators=[MinValueValidator(1), MaxValueValidator(5)])
 
 
     def __str__(self):
@@ -272,6 +281,7 @@ class side_quest_databese(models.Model):
     quest_name = models.CharField(max_length=100, blank=True)
     quest_type = models.CharField(max_length=100, blank=True, choices=quest_type_choices)
     description = models.TextField(blank=True)
+    dificulty = models.IntegerField(default=1, blank=True, null=True, validators=[MinValueValidator(1), MaxValueValidator(5)])
 
 
 
@@ -296,6 +306,7 @@ class side_quest_generated(models.Model):
     description = models.TextField(blank=True)
     xp_reward = models.IntegerField(default=0, blank=True)
     rarity = models.CharField(max_length=50, blank=True, choices=rarity_choices)
+    dificulty = models.IntegerField(default=1, blank=True, null=True, validators=[MinValueValidator(1), MaxValueValidator(5)])
     
 
     def __str__(self):

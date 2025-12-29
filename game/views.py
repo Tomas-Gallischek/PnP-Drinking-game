@@ -226,7 +226,9 @@ def quest_generator(request, player_id):
             rarity = 'common'
             rarity_kof = 1
 
-        xp_reward = round((50 + (one_player.lvl * 7)) * rarity_kof)
+        dificulty_bonus = (quest.dificulty / 10) + 1
+
+        xp_reward = round(((50 + (one_player.lvl * 5)) * rarity_kof) * dificulty_bonus)
 
         side_quest_generated.objects.create(
             player=one_player,
@@ -569,11 +571,18 @@ def test(request):
             all_players = player.objects.all()
 
 
-            for p in all_players:
-                stat_up_test(request, p.id)
+
             
             
             fight(request)
+
+            for p in all_players:
+                xp_lvl = p.lvl * 25 
+                random_xp = random.randint(1, xp_lvl)
+                p.add_xp(random_xp)
+
+            for p in all_players:
+                stat_up_test(request, p.id)
 
 
             rounds += 1

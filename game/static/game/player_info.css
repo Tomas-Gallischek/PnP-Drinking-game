@@ -210,3 +210,100 @@
         margin-top: 0;
     }
 }
+
+/* --- KONTEJNER --- */
+.glejt {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+    animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; /* Efektní přílet */
+}
+
+/* --- TLAČÍTKO GLEJTU --- */
+.decret-button {
+    position: relative; /* Důležité pro efekty uvnitř */
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #3e2723; /* Tmavě hnědá (vypadá dobře na zlaté) */
+    
+    /* Zlatý gradient */
+    background: linear-gradient(to bottom, #ffe082 0%, #f1c40f 50%, #b7950b 100%);
+    
+    padding: 15px 40px;
+    border: 3px solid #fff; /* Bílý rámeček */
+    border-radius: 50px; /* Kulaté rohy */
+    cursor: pointer;
+    overflow: hidden; /* Aby odlesk nevyjížděl ven */
+    transition: transform 0.2s, box-shadow 0.2s;
+    
+    /* Vnější záře (Svit) */
+    box-shadow: 
+        0 0 20px rgba(241, 196, 15, 0.6), 
+        inset 0 0 10px rgba(255, 255, 255, 0.5);
+    
+    /* Animace pulzování */
+    animation: legendary-pulse 2s infinite ease-in-out;
+}
+
+/* Vnitřní text - zvýraznění */
+.decret-button b {
+    display: block;
+    font-size: 1.8rem;
+    color: #2c3e50;
+    text-shadow: 0px 1px 0px rgba(255,255,255,0.4);
+}
+
+/* --- EFEKT ODLESKU (PŘELET SVĚTLA) --- */
+.decret-button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    
+    /* Šikmý pruh světla */
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    
+    /* Animace přeletu */
+    animation: shine-sweep 3s infinite;
+}
+
+/* --- INTERAKCE (HOVER) --- */
+.decret-button:hover {
+    transform: scale(1.1) translateY(-2px); /* Zvětšení a nadzvednutí */
+    box-shadow: 
+        0 0 40px rgba(241, 196, 15, 0.9), 
+        0 0 10px #fff;
+    background: linear-gradient(to bottom, #fff59d 0%, #fdd835 50%, #f9a825 100%);
+}
+
+.decret-button:active {
+    transform: scale(0.95);
+}
+
+/* --- DEFINICE ANIMACÍ --- */
+
+/* 1. Pulzování záře */
+@keyframes legendary-pulse {
+    0% { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); border-color: #fff; }
+    50% { box-shadow: 0 0 35px rgba(241, 196, 15, 1), 0 0 10px rgba(255,255,255,0.8); border-color: #ffe082; }
+    100% { box-shadow: 0 0 15px rgba(241, 196, 15, 0.5); border-color: #fff; }
+}
+
+/* 2. Přelet lesku */
+@keyframes shine-sweep {
+    0% { left: -100%; opacity: 0; }
+    20% { opacity: 1; }
+    50% { left: 200%; opacity: 0; } /* Rychlý přelet v první polovině času */
+    100% { left: 200%; opacity: 0; } /* Pauza do konce cyklu */
+}
+
+/* 3. Přílet tlačítka na scénu */
+@keyframes popIn {
+    0% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 1; transform: scale(1); }
+}

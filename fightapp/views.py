@@ -268,8 +268,8 @@ def fight(request):
         next_patro = patro + 1
         next_boss_info = boss_names_descriptions.objects.get(patro=next_patro)
         next_lvl = actual_boss.lvl + 1
-        next_reward = round(actual_boss.reward_xp * 1.1)
-        reward_limit = ((patro * 2) * 10)
+        next_reward = round(actual_boss.reward_xp * 1.2)
+        reward_limit = ((patro * 2.5) * 10)
         if next_reward < reward_limit:
             next_reward = reward_limit
         hraci = pocet_hracu.objects.first()
@@ -305,7 +305,7 @@ def fight(request):
         else:
             pass
         
-        print(f"Skill point balance pro nového bosse: {skill_point_balance} (průměrný skill point hráče: {prum_skill_points})")
+
 
         dmg = round(((hraci.all_players_dmg / pocet_hracu_now) * 1.1) * skill_point_balance)
         armor = round(((hraci.all_players_armor / pocet_hracu_now) * 0.8) * skill_point_balance)
@@ -345,14 +345,8 @@ def fight(request):
 
             reward_xp = round(next_reward)
         )
-        print("nový BOSS vytbořen:")
-        print("Patro:", next_patro)
-        print("Jméno:", next_boss_info.name)
-        print("Úroveň:", next_lvl)
-        print("DMG:", dmg)
-        print("Armor:", armor)
-        print("HP:", hp)
-        print("Odměna XP:", round(next_reward))
+
+        print(f"Vytvořen boss pro patro {next_patro} (Jmeno: {next_boss_info.name}) s DMG: {dmg}, ARMOR: {armor}, HP: {hp}, REWARD_XP: {next_reward}")
 
     
 
@@ -374,6 +368,9 @@ def dungeon(request):
     actual_boss_img = boss_names_descriptions.objects.get(patro=actual_boss.patro).boss_img
 
     energy_request = player.objects.filter(active=True)
+    for p in energy_request:
+        p.energy_update(0)  # Aktualizace energie bez odečtení
+
     low_energy_players = energy_request.filter(energie__lt=30)
 
     start_status = False
@@ -381,16 +378,12 @@ def dungeon(request):
     actual_patro = actual_boss.patro
     for p in energy_request:
         if p.energie < 30:
-            print("Hráč", p.name, "nemá dostatek energie:", p.energie)
+
             start_status = False
             break
         else:
             start_status = True
-            print("Hráč", p.name, "má dostatek energie:", p.energie)
- 
 
-    print("Aktuální soupeř:", actual_boss)
-    print("Startovní status:", start_status)
 
 
     return render(request, 'fightapp/dungeon.html', context={
