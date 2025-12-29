@@ -226,7 +226,7 @@ def quest_generator(request, player_id):
             rarity = 'common'
             rarity_kof = 1
 
-        xp_reward = round((50 + (one_player.lvl * 10)) * rarity_kof)
+        xp_reward = round((50 + (one_player.lvl * 7)) * rarity_kof)
 
         side_quest_generated.objects.create(
             player=one_player,
@@ -537,7 +537,7 @@ def reset(request):
             critic_chance = 1.5,
             dodge_chance = 1.5,
             
-            reward_xp = 100
+            reward_xp = 30
         )
         print("Vytvořen první boss.")
         
@@ -575,11 +575,7 @@ def test(request):
             
             fight(request)
 
-            all_players = player.objects.all()
-            for p in all_players:
-                random_xp = random.randint(20, 100)
-                p.add_xp(round(random_xp))
-                p.save()
+
             rounds += 1
             print(f"Round {rounds} completed.")
             print(f"Aktuální patro: {actual_patro}")
@@ -910,7 +906,7 @@ def fight_detail(request, fight_id):
     
     # Zobrazení detailu boje
 
-    fight_stats = fight_history.objects.filter(fight=one_fight)
+    fight_stats = fight_history.objects.filter(fight=one_fight).order_by('-total_dmg_delt')
 
 
     return render(request, 'game/fight_detail.html', context={

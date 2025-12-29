@@ -1,13 +1,209 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Detail boje{% endblock title %}
+
+{% block styly %}
+    <link rel="stylesheet" href="{% static 'game/leaderboard.css' %}">
+    <style>
+        /* Styl pro hlavičky, které jdou řadit */
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+            padding-right: 25px; /* Místo pro šipku */
+            user-select: none; /* Zabraňuje označování textu při rychlém klikání */
+        }
+        
+        th.sortable:hover {
+            background-color: #444; /* Světlejší pozadí při najetí */
+            color: #fff;
+        }
+
+        /* Šipky pro indikaci řazení */
+        th.sortable::after {
+            content: '↕'; /* Výchozí symbol */
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.3;
+            font-size: 0.8rem;
+        }
+
+        th.sortable.asc::after {
+            content: '▲';
+            opacity: 1;
+            color: #ffcc00;
+        }
+
+        th.sortable.desc::after {
+            content: '▼';
+            opacity: 1;
+            color: #ffcc00;
+        }
+    </style>
+{% endblock styly %}
 
 {% block content %}
-    <h1>Detail boje</h1>
-
-    {% for f in fight_stats %}
-
-        <p>Hráč: {{ f.player.name }}</p>
-        <p>Celkové poškození: {{ f.total_dmg_delt }}</p>
+<div class="leaderboard-wrapper">
     
-    {% endfor %}
+    <div class="leaderboard-title">
+        <h1>Detail boje</h1>
+        <h2 style="color: #e0e0e0; font-size: 1.5rem; margin-top: 10px;">
+            {{ one_fight.boss.name }} <span style="color: #888;">(Patro {{ one_fight.boss.patro }})</span>
+        </h2>
+        <p style="color: #aaa; margin-top: 5px;">
+            Výsledek: 
+            {% if one_fight.outcome == 'players' %}
+                <span style="color: #4caf50; font-weight: bold;">Vítězství</span>
+            {% elif one_fight.outcome == 'draw' %}
+                <span style="color: #ffcc00; font-weight: bold;">Remíza</span>
+            {% else %}
+                <span style="color: #ff5252; font-weight: bold;">Prohra</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="leaderboard-content">
+        <div class="leaderboard-pane active" style="display: block;">
+            
+            <div style="overflow-x: auto;">
+                <table class="pnp-table" id="fightTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortTable(0, 'string')">Hráč</th>
+                            <th class="sortable" onclick="sortTable(1, 'number')" title="Celkové udělené poškození">DMG<br>udělený</th>
+                            <th class="sortable" onclick="sortTable(2, 'number')" title="Nejvyšší jednorázové poškození">Max.<br>rána</th>
+                            <th class="sortable" onclick="sortTable(3, 'number')" title="Celkové obdržené poškození">DMG<br>obdržený</th>
+                            <th class="sortable" onclick="sortTable(4, 'number')" title="Počet smrtí v boji">Smrti</th>
+                            <th class="sortable" onclick="sortTable(5, 'number')" title="Počet provedených útoků">Útoky</th>
+                            <th class="sortable" onclick="sortTable(6, 'number')" title="Počet zásahů od bosse">Zásahy<br>(obdržené)</th>
+                            <th class="sortable" onclick="sortTable(7, 'number')" title="Kritické zásahy">Crity</th>
+                            <th class="sortable" onclick="sortTable(8, 'number')" title="Úspěšné úhyby">Úhyby</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in fight_stats %}
+                        <tr>
+                            <td class="player-name" data-value="{{ f.player.name }}">
+                                {{ f.player.name }}
+                                <br>
+                                <span style="font-size: 0.8rem; color: #888; font-weight: normal;">
+                                    {{ f.player.povolani }}
+                                </span>
+                            </td>
+                            
+                            <td class="value-highlight" data-value="{{ f.total_dmg_delt }}">{{ f.total_dmg_delt }}</td>
+                            
+                            <td data-value="{{ f.best_dmg_delt }}">{{ f.best_dmg_delt }}</td>
+                            
+                            <td style="color: #ff6b6b; font-weight: bold;" data-value="{{ f.total_dmg_taken }}">{{ f.total_dmg_taken }}</td>
+                            
+                            <td data-value="{{ f.death_counter }}">
+                                {% if f.death_counter > 0 %}
+                                    <span style="color: #ff5252;">☠ {{ f.death_counter }}</span>
+                                {% else %}
+                                    <span style="color: #4caf50;">0</span>
+                                {% endif %}
+                            </td>
+                            
+                            <td data-value="{{ f.attack_counter }}">{{ f.attack_counter }}</td>
+                            
+                            <td data-value="{{ f.attack_get }}">{{ f.attack_get }}</td>
+                            
+                            <td style="color: #ffcc00;" data-value="{{ f.crit_number }}">{{ f.crit_number }}</td>
+                            
+                            <td style="color: #4caf50;" data-value="{{ f.dodge_number }}">{{ f.dodge_number }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="javascript:history.back()" class="tab-btn" style="text-decoration: none; padding: 12px 25px; display: inline-block;">
+            &larr; Zpět na historii
+        </a>
+    </div>
+
+</div>
+
+<script>
+function sortTable(n, type) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("fightTable");
+    switching = true;
     
-{% endblock %}
+    // Nastavení výchozího směru (vzestupně)
+    dir = "asc"; 
+    
+    // Resetování šipek u ostatních sloupců
+    var headers = table.querySelectorAll("th");
+    headers.forEach(function(header, index) {
+        if (index !== n) {
+            header.classList.remove("asc", "desc");
+        }
+    });
+
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        
+        // Procházíme všechny řádky tabulky (kromě hlavičky)
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            
+            // Získání buněk k porovnání
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            
+            // Získání hodnot z atributu data-value (pro přesné řazení čísel i jmen)
+            var xValue = x.getAttribute("data-value");
+            var yValue = y.getAttribute("data-value");
+
+            // Konverze na čísla, pokud jde o číselný sloupec
+            if (type === 'number') {
+                xValue = parseFloat(xValue);
+                yValue = parseFloat(yValue);
+            } else {
+                xValue = xValue.toLowerCase();
+                yValue = yValue.toLowerCase();
+            }
+
+            // Porovnání hodnot podle směru
+            if (dir == "asc") {
+                if (xValue > yValue) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (xValue < yValue) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        
+        if (shouldSwitch) {
+            // Provedení prohození řádků
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++; 
+        } else {
+            // Pokud nedošlo k žádné změně a směr byl "asc", zkusíme "desc"
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+
+    // Aktualizace CSS třídy pro zobrazení správné šipky
+    var clickedHeader = headers[n];
+    clickedHeader.classList.remove("asc", "desc");
+    clickedHeader.classList.add(dir);
+}
+</script>
+{% endblock content %}

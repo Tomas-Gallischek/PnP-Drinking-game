@@ -234,11 +234,13 @@ def fight(request):
     # --- VYHODNOCENÍ VÍTĚZE A AKTUALIZACE LOGU ---
     if boss_hp <= 0:
         winner = "players"
+        print("HRÁČI vyhráli!")
 
         actual_boss.defeated = True
         actual_boss.save()
     else:
         winner = "boss"
+        print("BOSS vyhrál!")
 
         
     # Aktualizace hlavního záznamu boje
@@ -262,10 +264,14 @@ def fight(request):
 
     if winner == "players":
         # Vytvoření dalšího bosse
+        
         next_patro = patro + 1
         next_boss_info = boss_names_descriptions.objects.get(patro=next_patro)
         next_lvl = actual_boss.lvl + 1
         next_reward = round(actual_boss.reward_xp * 1.1)
+        reward_limit = ((patro * 2) * 10)
+        if next_reward < reward_limit:
+            next_reward = reward_limit
         hraci = pocet_hracu.objects.first()
         pocet_hracu_now = hraci.pocet_hracu_now
         next_criti_chance = actual_boss.lvl * 1.5
@@ -301,9 +307,9 @@ def fight(request):
         
         print(f"Skill point balance pro nového bosse: {skill_point_balance} (průměrný skill point hráče: {prum_skill_points})")
 
-        dmg = round((hraci.all_players_dmg / pocet_hracu_now) * 1.1) * skill_point_balance
-        armor = round((hraci.all_players_armor / pocet_hracu_now) * 0.8) * skill_point_balance
-        hp = round((hraci.all_player_hp * 0.9)) * skill_point_balance
+        dmg = round(((hraci.all_players_dmg / pocet_hracu_now) * 1.1) * skill_point_balance)
+        armor = round(((hraci.all_players_armor / pocet_hracu_now) * 0.8) * skill_point_balance)
+        hp = round(((hraci.all_player_hp * 0.85)) * skill_point_balance)
 
 # POJISTKA ABY NÁSLEDUJÍCÍ BOS BYL VŽDYCKY SILNĚJŠÍ NEŽ PŘEDCHOZÍ
 
