@@ -301,7 +301,7 @@ def fight(request):
         
         print(f"Skill point balance pro nového bosse: {skill_point_balance} (průměrný skill point hráče: {prum_skill_points})")
 
-        dmg = round((hraci.all_players_dmg / pocet_hracu_now) * 1.15) * skill_point_balance
+        dmg = round((hraci.all_players_dmg / pocet_hracu_now) * 1.1) * skill_point_balance
         armor = round((hraci.all_players_armor / pocet_hracu_now) * 0.8) * skill_point_balance
         hp = round((hraci.all_player_hp * 0.9)) * skill_point_balance
 

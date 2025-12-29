@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Historie soubojů:</h1>
+
+{% for fight in all_fights %}
+
+    <form action="{% url 'fight_detail' fight.id %}">
+        {% csrf_token %}
+        <button class="button" type="submit">
+            <a href="{% url 'fight_detail' fight.id %}">
+                č. {{local_fight_counter}}: BOSS: {{ fight.boss.name }} - Výsledek: {{ fight.outcome }}
+            </a>
+        </button¨>
+    </form>
+
+{% endfor %}
+
+{% endblock %}

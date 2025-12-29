@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base2.html" %}
 {% load static %}
 
 {% block styly %}
@@ -13,8 +13,8 @@
 
 <div class="character-grid">
     {% for player in all_players %}
-        {% if player.active == False %}
-            <form action="{% url "vyber_povolani" %}" method="post" class="char-form" style="--delay: {{ forloop.counter }};">
+        {% if player.active == True %}
+            <form action="{% url "player_info" player_id=player.id %}" method="post" class="char-form" style="--delay: {{ forloop.counter }};">
                 {% csrf_token %}
                 <input type="hidden" name="player_id" value="{{ player.id }}">
                 <button type="submit" class="button avatar-button">
@@ -27,9 +27,5 @@
     {% endfor %}
 </div>
 
-<form action="{% url "tut_seznameni" %}">
-    <button type="submit" class="button">ZPĚT</button>
-    <input type="hidden" name="player_id" value="{{ player_id }}">
-</form>
 
 {% endblock content %}

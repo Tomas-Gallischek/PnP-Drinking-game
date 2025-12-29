@@ -23,5 +23,7 @@ urlpatterns = [
     path('skill_reset/<int:player_id>/', views.skill_reset, name='skill_reset'),
     path('napoveda', views.napoveda, name='napoveda'),
     path('low_energy', views.low_energy, name='low_energy'),
-
+    path('max_quests_reached', views.max_quests_reached, name='max_quests_reached'),
+    path('fight_history', views.fight_history_function, name='fight_history'),
+    path('fight_detail/<int:fight_id>/', views.fight_detail, name='fight_detail'),
 ]

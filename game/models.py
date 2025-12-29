@@ -117,6 +117,8 @@ class player(models.Model):
 
     critic_chance = models.FloatField(default=1, blank=True, null=True, validators=[MinValueValidator(0), MaxValueValidator(50)])  # šance na kritický zásah
     dodge_chance = models.FloatField(default=1, blank=True, null=True, validators=[MinValueValidator(0), MaxValueValidator(50)])
+
+    quest_counter = models.IntegerField(default=0, blank=True, validators=[MinValueValidator(0), MaxValueValidator(3)])
     
 
 
@@ -158,6 +160,7 @@ class player(models.Model):
             self.xp = xp
             self.lvl += 1
             self.xp_need = int(round((xp_need + 40)))
+            print(f'{self.name} dosáhl/a LVL {self.lvl}.')
 
 
     # ABY SE POSTAVY VYLEPŠOVALY I LEVELEM TROCHU

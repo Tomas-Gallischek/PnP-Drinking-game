@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Detail boje</h1>
+
+    {% for f in fight_stats %}
+
+        <p>Hráč: {{ f.player.name }}</p>
+        <p>Celkové poškození: {{ f.total_dmg_delt }}</p>
+    
+    {% endfor %}
+    
+{% endblock %}

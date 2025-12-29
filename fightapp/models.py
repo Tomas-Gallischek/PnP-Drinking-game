@@ -89,6 +89,25 @@ class TurnLog(models.Model):
 
     def __str__(self):
         return f"Tah {self.turn_number} v boji {self.fight_id}"
+    
+
+class fight_history(models.Model):
+    fight = models.ForeignKey(FightLog, on_delete=models.CASCADE, related_name='fight_histories')
+
+    player = models.ForeignKey(player, on_delete=models.CASCADE, related_name='fight_histories', blank=True, null=True)
+
+    total_dmg_delt = models.IntegerField(default=0, blank=True)
+    best_dmg_delt = models.IntegerField(default=0, blank=True)
+    total_dmg_taken = models.IntegerField(default=0, blank=True)
+    death_counter = models.IntegerField(default=0, blank=True)
+    attack_counter = models.IntegerField(default=0, blank=True)
+    attack_get = models.IntegerField(default=0, blank=True)
+
+    crit_number = models.IntegerField(default=0, blank=True)
+    dodge_number = models.IntegerField(default=0, blank=True)
+
+    def __str__(self):
+        return f"Historie boje {self.fight_id}"
 
 
 

@@ -9,7 +9,7 @@ import stat
 from typing import ByteString
 from django.shortcuts import render, redirect
 from django.db.models import Q
-from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog
+from fightapp.models import boss, boss_names_descriptions, FightLog, TurnLog, fight_history
 from .models import player, side_quest, side_quest_databese, achievements, jmena_hracu, pocet_hracu, side_quest_generated, test_model
 from django.http import HttpResponse
 import random
@@ -65,6 +65,13 @@ def quest_done(request):
 
         completed_quest.save()
         main_player.save()
+        
+        main_player.quest_counter -= 1
+        main_player.save()
+
+        if coop_player:
+            coop_player_instance.quest_counter -= 1
+            coop_player_instance.save()
 
     return redirect('leaderboard')
 
@@ -97,7 +104,10 @@ def quest_failed(request):
 
 
         if one_player.energie < 50 or (coop_player and coop_player.energie < 50):
+            print("Spuštění podmínky pro nízkou energii hráče.")
+
             return redirect('low_energy')
+
         else:
             failed_quest.delete()
             print(f"coop_player: {coop_player}")
@@ -107,11 +117,20 @@ def quest_failed(request):
             one_player.energy_update(50)
             coop_player.energy_update(50) if coop_player else None
 
+            one_player.quest_counter -= 1
+            one_player.save()
+
+            if coop_player:
+                coop_player.quest_counter -= 1
+                coop_player.save()
 
 
-            return redirect('player_info', player_id=one_player.id)
+
+            return redirect('leaderboard')
     
     return redirect('index')
+
+
 
 def take_quest(request):
     if request.method == 'POST':
@@ -121,54 +140,53 @@ def take_quest(request):
         coop_player = player.objects.get(id=user_coop) if user_coop else None 
         print(f"Quest pro hráče: {user}, coop hráč: {user_coop}")
 
-        if coop_player:
-            if one_player.energie < 20 or coop_player.energie < 20:
-                return render(request, 'game/low_energy.html')
-        else:   
-            
-            if one_player.energie < 20:
-                return render(request, 'game/low_energy.html')
+        if one_player.energie < 20 or (coop_player and coop_player.energie < 20):
+            return redirect('low_energy')
+        
+        elif one_player.quest_counter >= 3 or (coop_player and coop_player.quest_counter >=3):
+            return redirect('max_quests_reached')
+        else:
+
+            quest_id = request.POST.get('quest_id')
+            selected_quest = side_quest_generated.objects.get(id=quest_id)
+
+            one_player.quest_refresh += 1
+            one_player.save()
+
+            if coop_player:
+                quest_name_final = selected_quest.quest_name+"("+one_player.name+" & "+coop_player.name+")"
             else:
+                quest_name_final = selected_quest.quest_name+"("+one_player.name+")"
 
-                quest_id = request.POST.get('quest_id')
-                selected_quest = side_quest_generated.objects.get(id=quest_id)
+            new_quest = side_quest.objects.create(
+                player=one_player,
+                player_name= one_player.name,
+                player_coop= coop_player.name if coop_player else "",
+                coop_player_name= coop_player.name if coop_player else "",
+                quest_type=selected_quest.quest_type,
+                quest_name=quest_name_final,
+                description=selected_quest.description,
+                xp_reward=selected_quest.xp_reward,
+                rarity=selected_quest.rarity,
+                done=False,
+            )       
 
-                one_player.quest_refresh += 1
-                one_player.save()
+            new_quest.save()
 
-                if coop_player:
-                    quest_name_final = selected_quest.quest_name+"("+one_player.name+" & "+coop_player.name+")"
-                else:
-                    quest_name_final = selected_quest.quest_name+"("+one_player.name+")"
+            one_player.energy_update(20)
+            coop_player.energy_update(20) if coop_player else None
 
-                new_quest = side_quest.objects.create(
-                    player=one_player,
-                    player_name= one_player.name,
-                    player_coop= coop_player.name if coop_player else "",
-                    coop_player_name= coop_player.name if coop_player else "",
-                    quest_type=selected_quest.quest_type,
-                    quest_name=quest_name_final,
-                    description=selected_quest.description,
-                    xp_reward=selected_quest.xp_reward,
-                    rarity=selected_quest.rarity,
-                    done=False,
-                )       
+            expirated_quests = side_quest_generated.objects.filter(player=one_player)
+            expirated_quests.delete()
 
-                new_quest.save()
+            one_player.quest_counter += 1
+            one_player.save()
 
-                one_player.energy_update(20)
-                coop_player.energy_update(20) if coop_player else None
+            if coop_player:
+                coop_player.quest_counter += 1
+                coop_player.save()
 
-                print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {one_player.name}: {one_player.energie}")
-
-                if coop_player:
-                    coop_player.energy_update(20)
-                    print(f"Hráči bylo odečteno 20 energie. Aktuální energie hráče {coop_player.name}: {coop_player.energie}" if coop_player else "Žádný coop hráč.")
-
-                expirated_quests = side_quest_generated.objects.filter(player=one_player)
-                expirated_quests.delete()
-
-                return redirect('player_info', player_id=one_player.id)
+            return redirect('player_info', player_id=one_player.id)
     else:
         return redirect('index')
 
@@ -388,7 +406,7 @@ def index22(request):
     return render(request, 'game/index22.html')
 
 def index(request):
-    all_players = player.objects.all()
+    all_players = player.objects.filter(active=True).order_by('score').reverse()
 
     return render(request, 'game/index.html', {
         'all_players': all_players,
@@ -812,3 +830,91 @@ def napoveda(request):
 
 def low_energy(request):
     return render(request, 'game/low_energy.html')
+
+def max_quests_reached(request):
+    return render(request, 'game/max_quests_reached.html')
+
+def fight_history_function(request):
+    all_fights = FightLog.objects.all().order_by('-fight_time')
+    local_fight_counter = all_fights.count()
+
+    return render(request, 'game/fight_history.html', context={
+        'all_fights': all_fights,
+        'local_fight_counter': local_fight_counter,
+        })
+
+def fight_detail(request, fight_id):
+    one_fight = FightLog.objects.get(id=fight_id)
+    all_turns = TurnLog.objects.filter(fight=one_fight).order_by('turn_number')
+    all_players = player.objects.all()
+
+    fight_history.objects.filter(fight=one_fight).delete()
+    print(f"Deleted existing fight history for fight ID: {one_fight.id}")
+
+    for p in all_players:
+        print(f"Processing stats for player: {p.name}")
+        # Reset hodnot pro dalšího hráče
+        total_dmg_delt = 0
+        best_dmg_delt = 0
+        total_dmg_taken = 0
+        death_counter = 0
+        attack_counter = 0
+        attack_get = 0
+        crit_number = 0
+        dodge_number = 0
+    
+        # ÚTOKY
+        total_dmg_delt_filter = all_turns.filter(attacker_player=p)
+
+
+        for turn in total_dmg_delt_filter:
+            print(f"Turn attacker: {turn.attacker_player}, damage dealt: {turn.damage_dealt}")
+            total_dmg_delt += turn.damage_dealt
+            attack_counter += 1
+            if turn.critic_status == True:
+                crit_number += 1
+            else:
+                crit_number = crit_number
+
+        best_dmg_delt = total_dmg_delt_filter.order_by('damage_dealt').reverse().first().damage_dealt if total_dmg_delt_filter.exists() else 0
+
+        # OBRANY
+        total_dmg_taken_filter = all_turns.filter(target_player=p)
+
+        for turn in total_dmg_taken_filter:
+            total_dmg_taken += turn.damage_dealt
+            attack_get += 1
+            if turn.target_player_hp_after <= 0:
+                death_counter += 1
+            else:
+                death_counter = 0
+            if turn.bojovy_postoj_status == True:
+                dodge_number += 1
+            else:
+                dodge_number = dodge_number
+
+        fight_history.objects.create(
+            fight=one_fight,
+            player=p,
+            total_dmg_delt=total_dmg_delt,
+            best_dmg_delt=best_dmg_delt,
+            total_dmg_taken=total_dmg_taken,
+            death_counter=death_counter,
+            attack_counter=attack_counter,
+            attack_get=attack_get,
+            crit_number=crit_number,
+            dodge_number=dodge_number,
+        )
+
+
+    
+    # Zobrazení detailu boje
+
+    fight_stats = fight_history.objects.filter(fight=one_fight)
+
+
+    return render(request, 'game/fight_detail.html', context={
+        'one_fight': one_fight,
+        'all_turns': all_turns,
+        'fight_stats': fight_stats,
+    })

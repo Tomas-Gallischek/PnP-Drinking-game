@@ -102,18 +102,18 @@
             {% csrf_token %}
 
 
-        <button type="submit" name="drink_type" value="panak" class="button">1 Panák (50 XP)</button>
+        <button type="submit" name="drink_type" value="panak" class="button" onclick="return confirm('OPRAVDU Jsi vypil PANÁK?');">1 Panák (50 XP)</button>
         Již vypito: <b>{{ one_player.panak }}</b> panáků
 
         <p></p>
         
 
-        <button type="submit" name="drink_type" value="maly_kelimek" class="button">1 MALÝ kelímek (30 XP)</button>
+        <button type="submit" name="drink_type" value="maly_kelimek" class="button" onclick="return confirm('OPRAVDU Jsi vypil MALÝ KELÍMEK?');">1 MALÝ kelímek (30 XP)</button>
         Již vypito: <b>{{ one_player.maly_kelimek }}</b> malých kelímků
 
         <p></p>
         
-        <button type="submit" name="drink_type" value="velky_kelimek" class="button">1 VELKÝ kelímek (40 XP)</button>
+        <button type="submit" name="drink_type" value="velky_kelimek" class="button" onclick="return confirm('OPRAVDU Jsi vypil VELKÝ KELÍMEK?');">1 VELKÝ kelímek (40 XP)</button>
         Již vypito: <b>{{ one_player.velky_kelimek }}</b> velkých kelímků
         
         <p></p>
@@ -134,7 +134,7 @@
         <input type="hidden" name="player_id" value="{{ one_player.id }}">
     </form>
 
-    <h1>Moje úkoly:</h1>
+    <h1>Moje úkoly: ({{ one_player.quest_counter }}/3)</h1>
 
     {% for quest in player_quests %}
         {% if quest.done == False %}
