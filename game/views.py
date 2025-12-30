@@ -923,3 +923,11 @@ def fight_detail(request, fight_id):
         'all_turns': all_turns,
         'fight_stats': fight_stats,
     })
+
+def add_xp(request):
+    if request.method == 'POST':
+        all_players = player.objects.all()
+        for p in all_players:
+            p.add_xp(1000)
+            p.save()
+        return redirect('index22')

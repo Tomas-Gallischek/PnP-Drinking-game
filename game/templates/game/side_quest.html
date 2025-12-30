@@ -37,6 +37,8 @@
         <p class="quest-reward">Odměna: {{ random_quest_alko.xp_reward }} XP</p>
         <p class="rarity-{{random_quest_alko.rarity}}"> <strong><b>{{ random_quest_alko.rarity }}</b></strong></p>
 
+        <p><i>(Vypitý alkohol si lze započítat do vypitých)</i></p>
+
         <form action="{% url 'take_quest' %}" method="post" class="quest-action-area">
             {% csrf_token %}
             <input type="hidden" name="quest_id" value="{{ random_quest_alko.id }}">

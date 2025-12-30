@@ -26,4 +26,5 @@ urlpatterns = [
     path('max_quests_reached', views.max_quests_reached, name='max_quests_reached'),
     path('fight_history', views.fight_history_function, name='fight_history'),
     path('fight_detail/<int:fight_id>/', views.fight_detail, name='fight_detail'),
+    path('add_xp', views.add_xp, name='add_xp'),
 ]

@@ -283,7 +283,8 @@ class side_quest_databese(models.Model):
     description = models.TextField(blank=True)
     dificulty = models.IntegerField(default=1, blank=True, null=True, validators=[MinValueValidator(1), MaxValueValidator(5)])
 
-
+    def __str__(self):
+        return f"{self.quest_name} ({self.quest_type})"
 
 class side_quest_generated(models.Model):
 
