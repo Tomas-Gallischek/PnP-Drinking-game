@@ -16,35 +16,45 @@ import random
 from fightapp.views import fight
 import datetime
 from django.utils import timezone
-
+from django.http import JsonResponse # Přidej tento import nahoru
 
 def stat_up(request, player_id):
-
     if request.method == 'POST':
         one_player = player.objects.get(id=player_id)
         stat_type = request.POST.get('stat_type')
+        
         if one_player.skill_points <= 0:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'error': 'Nedostatek bodů'}, status=400)
             return redirect('player_info', player_id=player_id)
-        else:
-            if stat_type == 'dmg':
-                random_dmg = random.uniform(0.8, 1.2)
-                one_player.dmg_now += round(one_player.dmg_koef * random_dmg)
-                one_player.skill_points -= 1
-                one_player.save()
-            elif stat_type == 'armor':
-                random_armor = random.uniform(0.8, 1.2)
-                one_player.armor_now += round(one_player.armor_koef * random_armor)
-                one_player.skill_points -= 1
-                one_player.save()
+        
+        # --- Původní logika zůstává stejná ---
+        if stat_type == 'dmg':
+            random_dmg = random.uniform(0.8, 1.2)
+            one_player.dmg_now += round(one_player.dmg_koef * random_dmg)
+            one_player.skill_points -= 1
+        elif stat_type == 'armor':
+            random_armor = random.uniform(0.8, 1.2)
+            one_player.armor_now += round(one_player.armor_koef * random_armor)
+            one_player.skill_points -= 1
+        elif stat_type == 'hp':
+            random_hp = random.uniform(0.8, 1.2)
+            one_player.hp_now += round(one_player.hp_koef * random_hp)
+            one_player.hp_actual_fight += round(one_player.hp_koef * random_hp)
+            one_player.skill_points -= 1
+        
+        one_player.save()
 
-            elif stat_type == 'hp':
-                random_hp = random.uniform(0.8, 1.2)
-                one_player.hp_now += round(one_player.hp_koef * random_hp)
-                one_player.hp_actual_fight += round(one_player.hp_koef * random_hp)
-                one_player.skill_points -= 1
-                one_player.save()
+        # --- NOVÁ ČÁST: Odpověď pro JavaScript ---
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'dmg_now': one_player.dmg_now,
+                'armor_now': one_player.armor_now,
+                'hp_now': one_player.hp_now,
+                'skill_points': one_player.skill_points,
+            })
 
-            return redirect('player_info', player_id=player_id)
+        return redirect('player_info', player_id=player_id)
 
 def quest_done(request):
     if request.method == 'POST':
@@ -126,7 +136,7 @@ def quest_failed(request):
 
 
 
-            return redirect('leaderboard')
+            return redirect('player_info', player_id=one_player.id)
     
     return redirect('index')
 
@@ -336,13 +346,19 @@ def player_info(request, player_id):
     actual_boss = boss.objects.filter(defeated=False).first()
     actual_patro = actual_boss.patro
 
-    dmg_koef_min = round(one_player.dmg_koef * 0.8, 1)
-    dmg_koef_max = round(one_player.dmg_koef * 1.2, 1)
-    armor_koef_min = round(one_player.armor_koef * 0.8, 1)
-    armor_koef_max = round(one_player.armor_koef * 1.2, 1)
-    hp_koef_min = round(one_player.hp_koef * 0.8, 1)
-    hp_koef_max = round(one_player.hp_koef * 1.2, 1)
+    dmg_koef_min = int(round(one_player.dmg_koef * 0.8, 1))
+    dmg_koef_max = int(round(one_player.dmg_koef * 1.2, 1))
+    armor_koef_min = int(round(one_player.armor_koef * 0.8, 1))
+    armor_koef_max = int(round(one_player.armor_koef * 1.2, 1))
+    hp_koef_min = int(round(one_player.hp_koef * 0.8, 1))
+    hp_koef_max = int(round(one_player.hp_koef * 1.2, 1))
 
+    player_dmg = int(one_player.dmg_now)
+    player_armor = int(one_player.armor_now)
+    player_hp = int(one_player.hp_now)
+
+    player_critic = int(one_player.critic_chance)
+    player_dodge = int(one_player.dodge_chance)
 
     one_player.energy_change()
     energy = one_player.energie
@@ -368,6 +384,11 @@ def player_info(request, player_id):
         'hp_koef_max': hp_koef_max,
         'energy': energy,
         'actual_patro': actual_patro,
+        'player_dmg': player_dmg,
+        'player_armor': player_armor,
+        'player_hp': player_hp,
+        'player_critic': player_critic,
+        'player_dodge': player_dodge,
         
         })
 
@@ -577,9 +598,12 @@ def test(request):
             fight(request)
 
             for p in all_players:
-                xp_lvl = p.lvl * 25 
-                random_xp = random.randint(1, xp_lvl)
-                p.add_xp(random_xp)
+                dificulty_bonus_random = random.randint(1, 5)
+                dificulty_bonus = (dificulty_bonus_random / 10) + 1
+                rarity_koef = random.uniform(1.0, 3.0)
+
+                xp_reward = round(((50 + (p.lvl * 5)) * rarity_koef) * dificulty_bonus)
+                p.add_xp(xp_reward)
 
             for p in all_players:
                 stat_up_test(request, p.id)

@@ -52,37 +52,37 @@
                 </div>
 
                 <div class="skill-points-highlight">
-                    Dostupné skill pointy: <b>{{ one_player.skill_points }} <img src="/media/icons/skill_point.png" alt="skill_point" width="25" height="25" center:"center"></b>
+                    Dostupné skill pointy: <b id="skill-points-count">{{ one_player.skill_points }}</b> <img src="/media/icons/skill_point.png" alt="skill_point" width="25" height="25" center:"center">
                     <form action="{% url 'skill_reset' one_player.id %}" method="post"> {% csrf_token %} <button type="submit" class="button" onclick="return confirm('Opravdu chcete resetovat staty za 200 energie?');">Resetovat staty (200 energie) </button></form>
                 </div>
             </div>
         </div>
 
         <div class="stats-grid">
-            <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card">
+            <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card stat-up-form">
                 {% csrf_token %}
 
-                <span class="stat-label"><img src="/media/icons/swords.png" alt="attack" width="30" height="30">: <b>{{ one_player.dmg_now }}</b></span>
+                <span class="stat-label"><img src="/media/icons/swords.png" alt="attack" width="30" height="30">: <b id="stat-dmg-now">{{ player_dmg }}</b></span>
 
                 <button type="submit" name="stat_type" value="dmg" class="stat-button">
                     <span class="plus-icon">+</span> ({{ dmg_koef_min }}-{{ dmg_koef_max }})
                 </button>
             </form>
 
-            <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card">
+            <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card stat-up-form">
                 {% csrf_token %}
 
-                <span class="stat-label"><img src="/media/icons/armor.png" alt="armor" width="40" height="40">: <b>{{ one_player.armor_now }}</b></span>
+                <span class="stat-label"><img src="/media/icons/armor.png" alt="armor" width="40" height="40">: <b id="stat-armor-now">{{ player_armor }}</b></span>
 
                 <button type="submit" name="stat_type" value="armor" class="stat-button">
                     <span class="plus-icon">+</span> ({{ armor_koef_min }}-{{ armor_koef_max }})
                 </button>
             </form>
 
-            <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card">
+            <form action="{% url 'stat_up' one_player.id %}" method="post" class="stat-card stat-up-form">
                 {% csrf_token %}
 
-                <span class="stat-label"><img src="/media/icons/life-bar.png" alt="hp" width="30" height="30">: <b>{{ one_player.hp_now }}</b></span>
+                <span class="stat-label"><img src="/media/icons/life-bar.png" alt="hp" width="30" height="30">: <b id="stat-hp-now">{{ player_hp }}</b></span>
 
                 <button type="submit" name="stat_type" value="hp" class="stat-button">
                     <span class="plus-icon">+</span> ({{ hp_koef_min }}-{{ hp_koef_max }})
@@ -91,8 +91,8 @@
         </div>
     </div>
 
-    <h3>Šance na KRITICKÝ ZÁSAH: </h3> {{ one_player.critic_chance }}% (max 50%)
-    <h3>Šance na BOJOVÝ POSTOJ: </h3> {{ one_player.dodge_chance }}% (max 50%)
+    <h3>Šance na KRITICKÝ ZÁSAH: </h3> <b>{{ player_critic }}</b>% (max 50%)
+    <h3>Šance na BOJOVÝ POSTOJ: </h3> <b>{{ player_dodge }}</b>% (max 50%)
         
 
 
@@ -143,6 +143,7 @@
             <p>Odměna XP: {{ quest.xp_reward }}</p>
             <p>Raritka: {{ quest.rarity }}</p>
 
+            
             <form action="{% url 'quest_failed' %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="player_id" value="{{ one_player.id }}">
@@ -158,5 +159,52 @@
 
 </div>
 
+<script>
+    // Skript pro odesílání statů bez refreshe stránky
+    document.querySelectorAll('.stat-up-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Zabrání klasickému odeslání a refreshi
+
+            const formData = new FormData(this);
+            const url = this.action;
+            const submitButton = this.querySelector('button[type="submit"]');
+            
+            // Přidáme hodnotu tlačítka do dat (Django ji potřebuje pro stat_type)
+            formData.append('stat_type', submitButton.value);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Identifikace pro Django view
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Chyba při vylepšování statu.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Aktualizace hodnot přímo v HTML
+                document.getElementById('stat-dmg-now').innerText = data.dmg_now;
+                document.getElementById('stat-armor-now').innerText = data.armor_now;
+                document.getElementById('stat-hp-now').innerText = data.hp_now;
+                document.getElementById('skill-points-count').innerText = data.skill_points;
+
+                // Pokud dojdou skill pointy, můžeme schovat tlačítka (volitelné)
+                if (data.skill_points <= 0) {
+                    document.querySelectorAll('.stat-button').forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // V případě chyby (např. 0 bodů) můžeme uživatele upozornit
+            });
+        });
+    });
+</script>
 
 {% endblock content %}
