@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}Historie soubojů{% endblock %}
+
 {% block content %}
 
 <h1>Historie soubojů:</h1>
@@ -10,7 +12,11 @@
         {% csrf_token %}
         <button class="button" type="submit">
             <a href="{% url 'fight_detail' fight.id %}">
-                BOSS: {{ fight.boss.name }} - Výsledek: {{ fight.outcome }}
+                {% if fight.outcome == "players" %}
+                    BOSS: {{ fight.boss.name }} - Vítězí hráči!
+                {% else %}
+                    BOSS: {{ fight.boss.name }} - Vítězí BOSS!
+                {% endif %}
             </a>
         </button¨>
     </form>
